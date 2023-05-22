@@ -333,8 +333,14 @@ router.post('/login', async (req, res) => {
 
     User.findOne({email:email}).then(async (userExist)  => {
         if (userExist) {
-            User.findOne({ password: password }).then(async (_userExist) => {
-                if (_userExist) {
+            const hashedPasswd = await bcrypt.compare(password,userExist.password);
+            console.log(hashedPasswd);
+            const salt = await bcrypt.genSalt(10);
+            const hassh = await bcrypt.hash(password,salt);
+            console.log(hassh);
+            
+            User.findOne({email:email}).then(async (_userExist) => {
+                if (_userExist && hashedPasswd) {
                     console.log("okkkk")
                     const user = await User.findOne({ email: email });
                     token = user.tokens[0]["token"];
@@ -382,6 +388,7 @@ router.post('/login', async (req, res) => {
                         }
                     }
                 } else {
+                    
                     res.status(220).send("invalid credential");
                 }
                 

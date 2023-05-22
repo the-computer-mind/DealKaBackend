@@ -84,7 +84,7 @@ router.post('/productupdate',  async (req, res ) => {
                                 console.log("line 126 of productadd");
                                 console.log(product_json.ProductImageUrl);
                                 const mdelete = await Product.updateOne({  name: user.name},
-                                    { "$pull": { "products":{"ProductImageUrl":product_json.ProductImageUrl}}, },{ safe: true, multi:true });
+                                    { "$pull": { "products":{"ProductId":product_json.ProductId}}, },{ safe: true, multi:true });
                                 console.log(mdelete);   
                                 const mdone = await Product.updateOne({ name: user.name },
                                     { "$push": { "products": product_json }},{upsert:false,strict:false});

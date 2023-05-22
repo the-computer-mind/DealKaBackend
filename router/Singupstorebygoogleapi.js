@@ -58,7 +58,13 @@ router.post('/storeuserbygoogleapi', async (req, res) => {
                         console.log("line 544444444444 strat user storing");
                         var namelower = name.toLowerCase();
                         console.log("namewwwwwwwwwwww" + namelower);
-                        const user = new User({ name: namelower, email: email, password: password, cpassword: cpassword,UserRole:"Normal",UserVerified:"No"});
+                        const salt = await bcrypt.genSalt(10);
+                        const hashedPasswd = await bcrypt.hash(password,salt);
+                        password=hashedPasswd;
+                        cpassword=hashedPasswd;
+                        
+
+                        const user = new User({ name: namelower, email: email, password: password, cpassword: cpassword,UserRole:"Moderator",UserVerified:"No"});
                         
                         const alltoken = await user.generateAuthToken();
                         console.log("google iiiii good");
@@ -70,7 +76,7 @@ router.post('/storeuserbygoogleapi', async (req, res) => {
                         // const user = new User({ name, email: email.toLowerCase()(), password, cpassword});
                         // const token = user.generateAuthToken();
                         // console.log('okeetioooooooo')
-                        const channel = new Channel({ name: namelower, ChannelStatus: 'Normal', ChannelLastActivatitydate:date,ChannelProfilePicLink: profilepic==""?"https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg":profilepic,ChannelbannerPicLink:"https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg",ChannelDescription:"Hey I created This Channel To Gain Knowladge",TotalChannelWatchTime:"0",TotalChannelViews:0,channelcreateddate:date,channeltags:namelower,channeluniquelink:'null',channellevel:'0',TotalNoOfSubscriber:0});
+                        const channel = new Channel({ name: namelower, ChannelStatus: 'Moderator', ChannelLastActivatitydate:date,ChannelProfilePicLink: profilepic==""?"https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg":profilepic,ChannelbannerPicLink:"https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg",ChannelDescription:"Hey I created This Channel To Gain Knowladge",TotalChannelWatchTime:"0",TotalChannelViews:0,channelcreateddate:date,channeltags:namelower,channeluniquelink:'null',channellevel:'0',TotalNoOfSubscriber:0});
                         const channelinfo = await channel.save().then(() => {
                             console.log(channel.name);
                         }).catch((err) =>

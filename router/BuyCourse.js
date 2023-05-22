@@ -29,6 +29,8 @@ require('../db/conn');
 const User = require('../model/userSchema');
 const Video = require("../model/video");
 const Course = require("../model/course");
+const Customer = require("../model/customers_model");
+const ProductReiewmodel = require("../model/ProductReviewModel");
 const Buy = require("../model/BuyItemsModel");
 app.use(express.json());
 const { json } = require('express');
@@ -71,15 +73,17 @@ const { json } = require('express');
 
 
 
-router.post('/buycourse' , async (req, res) => {
-    console.log('connection of Buying Course done');
+router.post('/buyproduct' , async (req, res) => {
+    console.log('connection of Buying product done');
     console.log(req.body);
     var courseid = req.header("CourseId");
     var username = req.header("Username");
+    var uniueidd = req.header("uniqueid");
+    var qnt = req.header("qnty");
     // res.status(201).send("url");
     //validating jwttoken
     try {
-      console.log("enteringggg to buy coursesss");
+      console.log("enteringggg to buy product");
       var newHeaders = [];
       newHeaders = req.header("authorization").split(",");
       console.log(req.header("authorization")+"hiii");
@@ -145,11 +149,12 @@ router.post('/buycourse' , async (req, res) => {
               //     {$match: {'products.rating': { $gte: "0",$lte: "5"}}},]
               //     ).sort({"products.rating":-1}).skip(skip).limit(5);
               // console.log(all_products);
-              try{const user = await User.findOne({ _id: verifyuser });
+              try{
 
               //get secure url of databse s3 bucket
 
               console.log("line 155");
+              const user = await User.findOne({ _id: verifyuser });
               console.log("JSON.parse(req.body)");
 
               var jasonn= req.body;
@@ -158,57 +163,110 @@ router.post('/buycourse' , async (req, res) => {
               console.log("user");
               if("size_v<487241590"=="size_v<487241590") { //in bytes
                 console.log("size is perfecttttttttttttttttttt");
-                Buy.findOne({ name: user.name }).then(async (videoexist) => {
+                Customer.findOne({  uniqueid: uniueidd  }).then(async (videoexist) => {
                     console.log(videoexist);
-                    const course = await Course.findOne({ CourseId: jasonn.course });
-                    if(course!=null) {
-                        console.log(course);
-                        jasonn.course=[course];
-                    } else if(course==null) {
-                        res.status(202).send("Course Not Found");
-                };
-                    if (!videoexist) {
+                    
+                    if (videoexist && videoexist.ispaid==false) {
                         console.log("l1");
-                        
-                        //console.log(jasonn.course);
-
-                        const buy = new Buy(
-                            {name:user.name,
-                            primeMember:false,
-                            primeMemberRefundStatus:"null",
-                            primememberPurchasedate:"null",
-                            primemembershipname:"null",
-                            primememberValiditydate:"null",
-                            primememberExpired:false,
-                            paidenrollCourses:[jasonn],
-                            freeEnrollcourses:[],
-                            paidenrollVideos:[],
-                            paidenrollProducts:[],}
-                            );
-                            const buyinfo = await buy.save()
-                            console.log(buyinfo);
-                            const mdone = await Course.updateOne({ CourseId: courseid },
+                        console.log(jasonn);
+                        const mmd = await ProductReiewmodel.findOne({
+                            ProductId: courseid
+                        });
+                        console.log(mmd);
+                        console.log("mmddddrfrrrrr");
+                        if(mmd ==null) {
+                            const mddone = new ProductReiewmodel( {
+                            ProductId: courseid ,
+                            Enrollusers:[{
+                            Customeruniqueid:uniueidd,
+                            username:username,
+                            buydate:jasonn.paydetails[0].paydate,
+                            review:"null",
+                            rating:"0",}] });
+                        const buyinfo = await mddone.save()
+                        console.log("hello byby");
+                        console.log(buyinfo);
+                        } else {
+                            console.log("hello bhaissab");
+                            const mmdone = await ProductReiewmodel.updateOne({ ProductId: courseid },
                                 { "$push": { "Enrollusers":
-                                 {username:user.name,
-                                buydate:jasonn.courseBuydate,
+                                 {  Customeruniqueid:uniueidd,
+                                    username:username,
+                                buydate:jasonn.paydetails[0].paydate,
                                 review:"null",
                                 rating:"0",} }, },{upsert:false,strict:false});
+                            console.log(mmdone);
+                        }
+
+
+                        
+
+
+                        const customerinfo = await Customer.updateOne({ "uniqueid": uniueidd },
+                        { "$set": { "Seen_Details": jasonn.Seen_Details }, });
+                        
+                            const mdone = await Customer.updateOne({ uniqueid: uniueidd },
+                                { "$push": { "adderess_details":
+                                    { buyer_adderess:jasonn.adderess_details[0].buyer_adderess,
+                                        confirm_by_seller:jasonn.adderess_details[0].confirm_by_seller,} }, "$set": { "ispaid": true , "Quantity":qnt}},  {upsert:false,strict:false});
                             console.log(mdone);
-                            const buyd = await Buy.findOne({ name: user.name });
+                            const mdone2 = await Customer.updateOne({ uniqueid: uniueidd },
+                                { "$push": { "paydetails":
+                                 { paydate:jasonn.paydetails[0].paydate,
+                                    payamount:jasonn.paydetails[0].payamount,
+                                    transaction_id:jasonn.paydetails[0].transaction_id,
+                                    payment_id:jasonn.paydetails[0].payment_id,} }},  {upsert:false,strict:false});
+                            console.log(mdone2);
+                            var stock = jasonn.product[0].ProductStock;
+                            console.log(stock)
+                            console.log(jasonn.Quantity)
+                            console.log(typeof jasonn.Quantity)
+
+                            
+                            stock = stock-parseInt(jasonn.Quantity);
+                            console.log(stock);
+                            console.log("stock");
+                            console.log(jasonn.product[0].ProductId)
+                            const fir = await Product.updateOne({"products.ProductId":jasonn.product[0].ProductId},
+                            { "$set":  { "products.0.ProductStock":stock} } );
+                            console.log(fir);
+                            const done = await User.updateOne({ name: jasonn.seller_name },
+                                { "$push": { "unsendmsg": { "message": "Buy", "incomingsocketid": JSON.stringify(jasonn) } }, }, { upsert: false, strict: false });
+                            const user = await User.findOne({ "name": jasonn.seller_name })
+                            console.log(done);
+                        
+                            console.log(user);
+                
+                            if(user.UserStatus=="online") {
+                    
+                            console.log(done);
+                          
+                            console.log(user);
+                
+                            global.io.to(user.socketid).emit("newmessage",  user.unsendmsg , async function( error ,messag ) {
+                                    console.log('messag is', messag);
+                                 
+                            } );
+                            
+                    ///// 
+                    /////
+                    /////
+                    /////
+                    /////       
+        
+                              
+                            }
+                            const buyd = await Customer.findOne({ uniqueid: uniueidd },);
                             res.status(201).send(buyd);
-                    } else if(videoexist!=null){
-                        console.log(videoexist);
-                        const done = await Buy.updateOne({ name: user.name },
-                            { "$push": { "paidenrollCourses": jasonn }, },{upsert:false,strict:false});
-                        const mdone = await Course.updateOne({ CourseId: courseid },
-                                { "$push": { "Enrollusers":
-                                 {username:user.name,
-                                buydate:jasonn.courseBuydate,
-                                review:"null",
-                                rating:"0.0",} }, },{upsert:false,strict:false});
-                        console.log(mdone);
-                        const buyd = await Buy.findOne({ name: user.name });
-                        res.status(201).send(buyd);
+                    } else if(!videoexist){
+                        console.log("203");
+                        res.status(203).send("Course Not Found");
+
+                        return 
+                    }else if(videoexist.ispaid==true){
+                        console.log("202");
+                        res.status(202).send("already buy");
+                        return 
                     }
                 
                 

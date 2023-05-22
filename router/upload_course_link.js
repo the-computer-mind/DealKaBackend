@@ -110,7 +110,8 @@ router.post('/uploadcourselink' , async (req, res) => {
               //     {$match: {'products.rating': { $gte: "0",$lte: "5"}}},]
               //     ).sort({"products.rating":-1}).skip(skip).limit(5);
               // console.log(all_products);
-              try{const user = await User.findOne({ _id: verifyuser });
+              try{
+              const user = await User.findOne({ _id: verifyuser });
 
               //get secure url of databse s3 bucket
 
@@ -119,13 +120,19 @@ router.post('/uploadcourselink' , async (req, res) => {
 
               var jasonn= req.body;
               var size_v = (jasonn.Course_size);
+              jasonn.Enrollusers=[];
               console.log(size_v);
               console.log("user");
-              if("size_v<487241590"=="size_v<487241590") { //in bytes
+              if(user.UserRole=="Admin" || user.UserRole=="SemiAdmin" ||  user.UserRole=="Moderator") { //in bytes
                 console.log("size is perfecttttttttttttttttttt");
                 Course.findOne({ CourseId: jasonn.CourseId }).then(async (videoexist) => {
                     if (!videoexist) {
                         try{console.log("l1");
+                        if(jasonn.Enrollusers==null) {
+                            jasonn.Enrollusers=[];
+                            console.log("getinfi")
+                         };
+                 console.log(jasonn.Enrollusers);
                         console.log(jasonn.Course_Section_List[0].videodetails);
                         const course = new Course(jasonn
                             );
@@ -146,6 +153,11 @@ router.post('/uploadcourselink' , async (req, res) => {
                         if(cours.unfinished==true){
                             const mdone = await Course.deleteOne({ CourseId: jasonn.CourseId,unfinished: true  });
                             console.log(mdone);
+                            if(jasonn.Enrollusers==null) {
+                                jasonn.Enrollusers=[];
+                                console.log("getinfi")
+                             };
+                     console.log(jasonn.Enrollusers);
                             const course = new Course(jasonn);
                             const courseinfo = await course.save()
                             console.log(courseinfo);

@@ -12,7 +12,6 @@ const otpgenerator = require("otp-generator");
 const userSchema = require('../model/userSchema');
 
 require('./jwt_auth');
-const Product = require("../model/productSchema");
 const jwtauth = require('./jwt_auth');
 
 //app.use(express.json({limit:"50mb"}));
@@ -32,8 +31,10 @@ const MultipleTry = require('../model/multipletrySchema');
 const { Stream } = require('stream');
 const Video = require("../model/video");
 const Course = require("../model/course");
+const Product = require("../model/productSchema");
 app.use(express.json());
 const { json } = require('express');
+const ProductReiewmodel = require("../model/ProductReviewModel");
 
 
 //
@@ -127,7 +128,7 @@ router.post('/getcoursereview' , async (req, res) => {
               console.log("user");
               if("size_v<487241590"=="size_v<487241590") { //in bytes
                 console.log("size is perfecttttttttttttttttttt");
-                Course.findOne({ CourseId: courseid }).then(async (userExist1) => { 
+                ProductReiewmodel.findOne({ ProductId: courseid }).then(async (userExist1) => { 
                     console.log(userExist1);
                     if (userExist1!=null) {
                         console.log("mmm");

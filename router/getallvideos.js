@@ -21,10 +21,10 @@ const AddMusicCatagory = require("../model/addnewmusicctagorymodel");
 const jwtauth = require('./jwt_auth');
 const { json, response } = require('express');
 
-try{router.post('/getallvideos',  async (req, res ) => {
+router.post('/getallsearchproducts',  async (req, res ) => {
 
     try {
-    console.log("enteringggg to getallvideos");
+    console.log("enteringggg to getallsearchproducts");
     var newHeaders = [];
     newHeaders = req.header("authorization").split(",");
     console.log(req.header("authorization")+"hiii");
@@ -34,7 +34,7 @@ try{router.post('/getallvideos',  async (req, res ) => {
     var page = req.header("page");
     var search = req.header("search");
     var name = req.header("name");
-    var no_of_videos_sendig=20;
+    var no_of_videos_sendig=50;
     // const productata = JSON.parse(req.body);
     console.log(); //this is the productmodel coming from flutter
     console.log("req.body[1]");
@@ -89,55 +89,66 @@ try{router.post('/getallvideos',  async (req, res ) => {
             console.log('under getallvideooooooooooooooo');
             var count;
             console.log( search);
+            console.log(filter);
             if(search=="false"){
                 
-            const total_products = await Video.aggregate([
-                // {$unwind: '$products'},
-                {$match: {'Approved': true}},
-                {$match: {'shortvideo': false},}]
-                )
+            // const total_products = await Video.aggregate([
+            //     // {$unwind: '$products'},
+            //     {$match: {'Approved': true}},
+            //     {$match: {'shortvideo': false},}]
+            
+            //     )
 
-            const channeldescrip2= await Channel.findOne(
-                    {name : user.name},);
-
-            //const userrole = await User.findOne({name: username});
+            const total_products = await Product.aggregate([
+                {$unwind: '$products'},
+                {$match: {'products.rating': { $gte: "0",$lte: "5"}}},
+                {$match: {'products.listing':"Listed Product(Visible To Everyone)"}},
+                {$match: {'products.status':"created"}},
+                
+            ]).sort({"products.rating":-1}).skip(skip).limit(50);
             console.log("okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"+total_products.length);
-            console.log(name);
-            const all_videos = await Video.aggregate([
-                // {$unwind: '$products'},
-                {$match: {'Approved': true}},
-                {$match: {'shortvideo': false},}
-            ]
-                ).sort({"Algorithmpush":-1, _id: -1 }).skip(skip).limit(no_of_videos_sendig);
-            console.log(user);
+           
             res.setHeader('total_products',total_products.length);
-            const musiccatagoryy = await AddMusicCatagory.aggregate([
-                // {$unwind: '$products'},
-                {$match: {}},]
-                ).sort({"index":1});
             
 
-            const all_products= [all_videos,user.UserRole,user.UserStatus,channeldescrip2,musiccatagoryy];
-            res.status(201).send(all_products);
+            res.status(201).send(total_products);
          
         
         } else if(search=="true") {
             console.log(searchquery);
-                const total_products = await Video.aggregate([
+            if(filter=="All")
+            
+            
+              {  console.log(filter);
+                const all_products = await Product.aggregate([
+                    {$unwind: '$products'},
                     // {$unwind: '$products'},
-                    {$match: {'Approved': true}},
-                    {$match: {'shortvideo': false},}]
-                    )
-                console.log("tata"+total_products.length);
-                const all_products = await Video.aggregate([
+                     {$match: {"products.state" : {$regex : '.*' + searchquery + '.*'},'products.listing':"Listed Product(Visible To Everyone)"}},
+                     {$match: {'products.status':"created"}
+                 },
+                ]).sort({"products.rating":-1}).skip(skip).limit(50);
+                console.log(all_products.length);
+                console.log(all_products);
+                res.setHeader('total_products',all_products.length);
+                res.status(201).send(all_products);
+            }
+
+            else {
+                const all_products = await Product.aggregate([
+                    {$unwind: '$products'},
                     // {$unwind: '$products'},
-                    {$match: {"tags" : {$regex : '.*' + searchquery + '.*'},'Approved': true}},
-                    {$match: {'shortvideo': false},}
-                ]
-                    ).sort({"Algorithmpush":-1}).skip(skip).limit(no_of_videos_sendig);
-                // console.log(all_products);
-                res.setHeader('total_products',total_products.length);
-                res.status(201).send(all_products);}
+                     {$match: {"products.state" : {$regex : '.*' + searchquery + '.*'},'products.listing':"Listed Product(Visible To Everyone)"}},
+                     {$match: {'products.status':"created",'products.type':filter}
+                 },
+                ]).sort({"products.rating":-1}).skip(skip).limit(50);
+                console.log(all_products.length);
+                console.log(all_products);
+                res.setHeader('total_products',all_products.length);
+                res.status(201).send(all_products);
+
+            }
+            
+            }
             }
             
         
@@ -219,8 +230,4 @@ try{router.post('/getallvideos',  async (req, res ) => {
     
 });
 
-
-    module.exports = router;
-} catch (err) {
-    console.log(err);
-}
+module.exports = router;

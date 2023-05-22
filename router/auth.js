@@ -110,7 +110,7 @@ router.post('/sendotp', async (req, res) => {
                                 twillo.messages.create({
                                     from:process.env.twillo_number,
                                     to:"+91"+email,
-                                    body:`Hey Quderiya Gulam Your otp is ${otp} to Verify`
+                                    body:`Hey DealKaro Gulam Your otp is ${otp} to Verify`
 
                                 }).then((resul)=>(console.log(`message otp is send to  ${email}`))).catch((ee)=>(console.log(`your error of twillo is ${ee}`)));
                                 //sending te otp to the phone number

@@ -33,6 +33,7 @@ const MultipleTry = require('../model/multipletrySchema');
 const { Stream } = require('stream');
 const Video = require("../model/video");
 const Course = require("../model/course");
+const Customer = require("../model/customers_model");
 const Buy = require("../model/BuyItemsModel");
 const OrderCheck = require("../model/paymentordergenarate");
 app.use(express.json());
@@ -60,7 +61,10 @@ router.post('/generateorderid' , async (req, res) => {
       // console.log(req.header("size") + "hiii");
       // var filter = req.header("filter");
       var courseid = req.header("CourseId");
-      // const productata = JSON.parse(req.body);
+      var type1 = req.header("type");
+      var unique_id = req.header("unique_id");
+      var forwhat = req.header("for");
+      var quantity = req.header("quantity");
       console.log(); //this is the productmodel coming from flutter
       console.log("req.body[1]");
         // var newHeaders = headers.split(",");
@@ -108,44 +112,50 @@ router.post('/generateorderid' , async (req, res) => {
           console.log(User)
           if (devicenum == 1 || devicenum == 2 || devicenum == 3 || devicenum == 4 || devicenum == 0) {
               console.log('under refer========true');
-              // var count;
-              // const total_products = await Product.aggregate([
-              //     {$unwind: '$products'},
-              //     {$match: {'products.rating': { $gte: "0",$lte: "5"}}},]
-              //     )
-              // console.log("okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"+total_products.length);
-              // const all_products = await Product.aggregate([
-              //     {$unwind: '$products'},
-              //     {$match: {'products.rating': { $gte: "0",$lte: "5"}}},]
-              //     ).sort({"products.rating":-1}).skip(skip).limit(5);
-              // console.log(all_products);
+             
               try{const user = await User.findOne({ _id: verifyuser });
 
               //get secure url of databse s3 bucket
-              const course = await Course.findOne({ CourseId: courseid });
+              
               console.log("line 155");
               console.log("JSON.parse(req.body)");
 
-              var jasonn= req.body;
+              var jasonn= req.body[0];
+              
               console.log(user.name);
-              const coursemtch = await Buy.findOne({name: user.name,'paidenrollCourses.course[0].CourseId':  courseid});
+              console.log(unique_id);
+              const coursemtch = await Customer.findOne({uniqueid:unique_id});
               console.log("cy"+typeof(coursemtch)+"yc");
               console.log("cy"+coursemtch+"yc");
+             if(forwhat=="Order"){ 
+              const fir = await Product.updateOne({ ProductId:courseid});
+              console.log(fir);
+              console.log(fir.ProductStock);
+              console.log("fir");
+              if(fir.ProductStock<parseInt(quantity)) {
+                res.status(204).send("error!");
+              }};
               if(coursemtch==null) { //in bytes
+                var product_json = JSON.parse(req.body[1]);
+                console.log("saving customerdetails");
+                console.log(product_json);
+                const customer1 = new Customer(product_json);
+                const customerinfo = await customer1.save()
+                console.log(customerinfo);
                 console.log("size is perfecttttttttttttttttttt");
-                console.log(req.body.amount);
+                console.log(req.body[0].amount);
                 
                 var instance = new Razorpay({
-                    key_id: 'rzp_live_j6F4zbaGmLsINr',
-                    key_secret: 'Q0JQX5msC5jzReU4hRUpavWg',
+                    key_id: 'rzp_test_QSvlrPYLYsBH64',
+                    key_secret: 'ShRicA8weoAPK7oOmkYpyHXL',
                   });
                 var options = {
-                    amount: req.body.amount*100,  // amount in the smallest currency unit
+                    amount: req.body[0].amount*100,  // amount in the smallest currency unit
                     currency: "INR",
-                    receipt: req.body.txns,
+                    receipt: req.body[0].txns,
                     // notes: {
-                    //     key_id: 'rzp_live_j6F4zbaGmLsINr',
-                    //     key_secret: 'Q0JQX5msC5jzReU4hRUpavWg', 
+                    //     key_id: 'rzp_test_QSvlrPYLYsBH64',
+                    //     key_secret: 'ShRicA8weoAPK7oOmkYpyHXL', 
                     // }
                   };
                 try{
@@ -162,8 +172,8 @@ router.post('/generateorderid' , async (req, res) => {
                             const orderc = new OrderCheck(
                                 {name:user.name,
                                 courseid:courseid,
-                                price:req.body.amount,
-                                type:"Course",
+                                price:req.body[0].amount,
+                                type:type1,
                                 orderid:order.id,
                                 date:kk,}
                                 );
@@ -179,8 +189,52 @@ router.post('/generateorderid' , async (req, res) => {
                 // res.setHeader('total_products',);
                 
               }else{
-                console.log(" bhaggggggggggggggggggggg");
-                res.status(202).send("Already Enroll!");
+
+                console.log("req.body.amount");
+                
+                var instance = new Razorpay({
+                    key_id: 'rzp_test_QSvlrPYLYsBH64',
+                    key_secret: 'ShRicA8weoAPK7oOmkYpyHXL',
+                  });
+                var options = {
+                    amount: req.body[0].amount*100,  // amount in the smallest currency unit
+                    currency: "INR",
+                    receipt: req.body[0].txns,
+                    // notes: {
+                    //     key_id: 'rzp_test_QSvlrPYLYsBH64',
+                    //     key_secret: 'ShRicA8weoAPK7oOmkYpyHXL', 
+                    // }
+                  };
+                try{
+                    instance.orders.create(options, async  function(err, order)  {
+                        if(err) {
+                            console.log(err);
+                        } else{console.log(order);
+                            console.log(order.id);
+                            const timeElapsed = Date.now();
+                            const today = new Date(timeElapsed);
+                            var kk=today.toDateString();
+                            console.log(kk);
+
+                            const orderc = new OrderCheck(
+                                {name:user.name,
+                                courseid:courseid,
+                                price:req.body[0].amount,
+                                type:type1,
+                                orderid:order.id,
+                                date:kk,}
+                                );
+                                const buyinfo = await orderc.save()
+                                console.log(buyinfo);
+                            res.status(203).send(order.id);}
+
+                  });}catch(err) {
+                    console.log("line no 174"+err);
+                    res.status(202).send("error!");
+                  }
+
+                // console.log(" bhaggggggggggggggggggggg");
+                // res.status(202).send("Already Enroll!");
               }} catch(err) {
                 console.log("line no 174"+err);
               }

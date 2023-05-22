@@ -121,7 +121,7 @@ router.post('/enrollfreecourse' , async (req, res) => {
             //   var size_v = (jasonn.music_size);
              // console.log(size_v);
               console.log("user");
-              const coursemtch = await Buy.findOne({name: user.name,'freeEnrollcourses.course[0].CourseId':  courseid});
+              const coursemtch = await Buy.findOne({name: user.name, "freeEnrollcourses.course.CourseId":{ "$in" : [ courseid ]  }});
               console.log(coursemtch);
               if(coursemtch==null) { //in bytes
                 console.log("size is perfecttttttttttttttttttt");
@@ -130,6 +130,10 @@ router.post('/enrollfreecourse' , async (req, res) => {
                     const course = await Course.findOne({ CourseId: jasonn.course });
                     if(course!=null) {
                         console.log("course");
+                        
+                        if(course.Enrollusers==null) {
+                           course.Enrollusers=[]; 
+                        }
                         jasonn.course=[course];
                     } else if(course==null) {
                         res.status(202).send("Course Not Found");
@@ -189,9 +193,15 @@ router.post('/enrollfreecourse' , async (req, res) => {
                 console.log(past);
                 if(past==null) {
                     const course = await Course.findOne({ CourseId: jasonn.course });
+
                     if(course!=null) {
                         console.log("course");
                         jasonn.course=[course];
+                        if(jasonn.Enrollusers==null) {
+                            jasonn.Enrollusers=[];
+                            console.log("getinfi")
+                         };
+                 console.log(jasonn.Enrollusers);
                     }
                     const mdone = await Course.updateOne({ CourseId: courseid },
                         { "$push": { "Enrollusers":

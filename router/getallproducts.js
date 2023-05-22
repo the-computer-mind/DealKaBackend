@@ -96,20 +96,20 @@ try{router.post('/getallproducts',  async (req, res ) => {
              } 
             
             else{
-                console.log("under type all");
+                console.log("under type "+type);
                 const total_products = await Product.aggregate([
                     {$unwind: '$products'},
-                    {$match: {'products.rating': { $gte: "0",$lte: "5"}}},]
+                    {$match: {'products.type': type}},]
                     )
-                console.log("okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"+total_products.length);
+                console.log("okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"+total_products.length+"lll"+page);
                 
                     const all_products = await Product.aggregate([
                         {$unwind: '$products'},
                         {$match: {'products.type': type}},]
                         ).sort({_id: -1 }).skip(skip).limit(50);
                     console.log(all_products.length);
-                    console.log("cy"+typeof(all_products)+"yc");
-                    res.setHeader('total_products',all_products.length);
+                    console.log("cy   "+all_products+"yc");
+                    res.setHeader('total_products',total_products.length);
             res.status(201).send(all_products);
             }
             

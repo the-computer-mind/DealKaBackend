@@ -124,6 +124,11 @@ router.post('/editcourse' , async (req, res) => {
                 Course.findOne({ CourseId: jasonn.CourseId }).then(async (Courseexist) => {
                     console.log(Courseexist);
                     if (Courseexist) {
+                        if(jasonn.Enrollusers==null) {
+                            jasonn.Enrollusers=[];
+                            console.log("getinfi")
+                         };
+                 console.log(jasonn.Enrollusers);
                         console.log("l1");
                         const total_products = await Course.deleteOne({CourseId: jasonn.CourseId});
                         const course = new Course(jasonn

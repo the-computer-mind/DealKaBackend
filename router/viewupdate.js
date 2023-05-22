@@ -143,6 +143,10 @@ router.post('/viewupdate' , async (req, res) => {
                     
                         
                         const videoh = await Video.findOne({VideoId: videoid});
+                        if(videoh==null) {
+                            res.status(202).send("Already Viewed No Change!");
+                            return;
+                        }
                         console.log(videoh);
                         console.log(videoh.no_views+1);
                         console.log(videoh.no_views);

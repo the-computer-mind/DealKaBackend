@@ -20,40 +20,35 @@ const Product = require("../model/productSchema");
 const jwtauth = require('./jwt_auth');
 const { json } = require('express');
 
-router.post('/productadd',  async (req, res ) => {
+router.post('/productadd',upload.array("image",3),  async (req, res ) => {
 
     try {
     console.log("enteringggg to productadd");
+    console.log(req.files.length);
     var newHeaders = [];
-      newHeaders = req.header("authorization").split(",");
-      console.log(req.header("authorization")+"hiii");
-      // console.log(req.header("size") + "hiii");
-      // var filter = req.header("filter");
-      // var page = req.header("page");
-      // const productata = JSON.parse(req.body);
-      console.log(); //this is the productmodel coming from flutter
-      console.log("req.body[1]");
-        // var newHeaders = headers.split(",");
-      const devicenum = newHeaders[0].slice(1, 2);
-      console.log(devicenum);
-      process.env.DeviceId=devicenum;
-      process.env.jwt_token = newHeaders[1].slice(1,);
-      console.log(process.env.jwt_token);
-      process.env.jwt_retoken = newHeaders[2];
-      process.env.jwt_retoken = process.env.jwt_retoken.slice(1, (process.env.jwt_retoken.length - 1));
-      console.log(process.env.jwt_retoken);
-      console.log(typeof(headers));
-      if (devicenum == 9) {
-              res.status(401).send();
-      }
-  
-      
-  
-      // const {alltoken} = req.get('Authorization');
-      console.log(process.env.jwt_token);
-      console.log('okkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
-      console.log(process.env.jwt_retoken);
-      console.log('okkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
+    newHeaders = req.header("authorization").split(",");
+    console.log(req.header("authorization")+"hiii");
+    // const productata = JSON.parse(req.body);
+    console.log(JSON.parse(req.body.json)); //this is the productmodel coming from flutter
+    console.log("req.body[1]");
+      // var newHeaders = headers.split(",");
+    const devicenum = newHeaders[0].slice(1, 2);
+    console.log(devicenum);
+    process.env.jwt_token = newHeaders[1].slice(1,);
+    console.log(process.env.jwt_token);
+    process.env.DeviceId=devicenum;
+    process.env.jwt_retoken = newHeaders[2];
+    process.env.jwt_retoken = process.env.jwt_retoken.slice(1, (process.env.jwt_retoken.length - 1));
+    console.log(process.env.jwt_retoken);
+    console.log(typeof(headers));
+
+    
+
+    // const {alltoken} = req.get('Authorization');
+    console.log(process.env.jwt_token);
+    console.log('okkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
+    console.log(process.env.jwt_retoken);
+    console.log('okkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
     //verifying is the jwt valid
     var refer = await jwtauth();
     var verifyuser;
@@ -76,7 +71,7 @@ router.post('/productadd',  async (req, res ) => {
         console.log(User)
         if (devicenum == 1 || devicenum == 2 || devicenum == 3 || devicenum == 4 || devicenum == 0) {
             console.log('under refer==true');
-            var product_json = req.body
+            var product_json = JSON.parse(req.body.json)
             Product.findOne({ "products.ProductName" : product_json.ProductName }).then(async (userExist) => {
                 if (userExist) {
                     var productinfo = await Product.aggregate([
@@ -99,7 +94,36 @@ router.post('/productadd',  async (req, res ) => {
 
                                 console.log("user");
                                 console.log("devi 1");
+                                const imageurl = [];
                                 
+                                for (i = 0; i < req.files.length; i++) {
+                                    const result = await cloudinary.uploader.upload(req.files[i].path);
+                                    console.log(result.secure_url);
+                                    imageurl.push(result.secure_url);
+                                }
+                                console.log("kiooooooooooooooooooooooooooo line 105");
+
+                                const files = fs.readdirSync("./router/multer_images");
+                                console.log("hiiiiiiiiiiiiiiiiiii");
+                                try {
+                                    if (files != null) {
+                                        for (const file of files) {
+                                            console.log(file);
+                                            fs.unlinkSync(path.join("./router/multer_images", file), err => {
+                                                if (err) throw err;
+                                            });
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.log("under err" + e);
+                                }
+                                console.log(imageurl+"jiiiiiiiii");
+                                
+                                req.body.json.ProductImageUrl = imageurl;
+                                console.log(req.body.json);
+                                
+                                product_json.ProductImageUrl = imageurl
+                                console.log(product_json);
                                 const user = await User.findOne({ _id: verifyuser });
                                 console.log("r1");
                                 const oldproduct = await Product.findOne({ name: user.name });
@@ -142,7 +166,35 @@ router.post('/productadd',  async (req, res ) => {
                 } else if (!userExist) {
                     console.log("user");
                     console.log("devi 1");
+                    const imageurl = [];
+                    
+                    for (i = 0; i < req.files.length; i++) {
+                        const result = await cloudinary.uploader.upload(req.files[i].path);
+                        console.log(result.secure_url);
+                        imageurl.push(result.secure_url);
+                    }
+                    console.log(imageurl);
+                    console.log("kiooooooooooooooooooooooooooo line 105");
+
+                    const files = fs.readdirSync("./router/multer_images");
+                    console.log("hiiiiiiiiiiiiiiiiiii");
+                    try {
+                        if (files != null) {
+                            for (const file of files) {
+                                console.log(file);
+                                fs.unlinkSync(path.join("./router/multer_images", file), err => {
+                                    if (err) throw err;
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.log("under err" + e);
+                    }
+                    
+                    req.body.json.ProductImageUrl = imageurl;
                     console.log(req.body.json);
+                    
+                    product_json.ProductImageUrl = imageurl
                     console.log(product_json);
                     const user = await User.findOne({ _id: verifyuser });
                     console.log("r1");
@@ -202,8 +254,9 @@ router.post('/productadd',  async (req, res ) => {
         res.status(200).send("token code expire but refresh work");
         return;
     } else if (refer == 2) {
+        
         console.log("done");
-         
+       
         try {
                 if (devicenum == 0) {
                   console.log("yes jwt token is not expired");

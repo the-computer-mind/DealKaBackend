@@ -21,7 +21,7 @@ const { json } = require('express');
 router.post('/userallproducts', async (req, res) => {
 
     try {
-        console.log("enteringggg to productadd");
+        console.log("enteringggg to userallproduct");
         
         var newHeaders = [];
         newHeaders = req.header("authorization").split(",");
@@ -34,6 +34,7 @@ router.post('/userallproducts', async (req, res) => {
         console.log(devicenum);
         process.env.jwt_token = newHeaders[1].slice(1,);
         console.log(process.env.jwt_token);
+        process.env.DeviceId=devicenum;
         process.env.jwt_retoken = newHeaders[2];
         process.env.jwt_retoken = process.env.jwt_retoken.slice(1, (process.env.jwt_retoken.length - 1));
         console.log(process.env.jwt_retoken);

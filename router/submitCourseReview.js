@@ -27,11 +27,10 @@ const jwtauth = require('./jwt_auth');
 dotenv.config({path: '../config.env'});
 require('../db/conn');
 const User = require('../model/userSchema');
-const OtpM = require('../model/otpSchema');
+const ProductReview = require('../model/ProductReviewModel');
 const MultipleTry = require('../model/multipletrySchema');
 const { Stream } = require('stream');
-const Video = require("../model/video");
-const Course = require("../model/course");
+const Customer = require("../model/customers_model");
 app.use(express.json());
 const { json } = require('express');
 
@@ -54,6 +53,7 @@ router.post('/submitcourserating' , async (req, res) => {
       var courseid = req.header("CourseId");
       var username = req.header("Username");
       var rating = req.header("Rating");
+      var uniueidd = req.header("cusid")
     //   var review = req.header("Review");
       // const productata = JSON.parse(req.body);
       console.log(); //this is the productmodel coming from flutter
@@ -128,34 +128,44 @@ router.post('/submitcourserating' , async (req, res) => {
               console.log("user");
               if("size_v<487241590"=="size_v<487241590") { //in bytes
                 console.log("size is perfecttttttttttttttttttt");
-                Course.findOne({ CourseId: courseid }).then(async (userExist1) => { 
+                Product.findOne({ ProductId: courseid }).then(async (userExist1) => { 
                     //console.log(userExist1);
                     var rate=0;
+                    var rating2 = 0.0;
                     if (userExist1!=null) {
-                        if(userExist1.courseRating!=null) 
-                        {   
-                            rate=userExist1.courseRating;
-                            const past = await Course.findOne({CourseId:courseid,Enrollusers : { $elemMatch : { username : user.name } }}).select({Enrollusers : { $elemMatch : { username : user.name } }});
-                            console.log(past);
-                            if(past!=null){if(past.Enrollusers[0].review=="null") {
-                                rate=rate+1;
-                                console.log("hello bhaiiii");
-                            }}
-                            
-                            
-
-                            
-                        };
-                        console.log("mmm");
-                        // ( { dates : { $elemMatch: {  date : { $gte: 'DATE_VALUE' } } } } )
-                        const done = await Course.updateOne(
-                            {CourseId:courseid, Enrollusers : { $elemMatch : { username : user.name } } },
-                             {$set: {"Enrollusers.$.review": review,"Enrollusers.$.rating": rating,"courseRating":rate}});
-                        // res.setHeader('user',null);
-                        const gv = await Course.findOne({CourseId: courseid});
-                        console.log(done);
-
-                        res.status(201).send(gv.Enrollusers);
+                        const past = await ProductReview.findOne({ProductId:courseid,Enrollusers : { $elemMatch : { username : user.name , Customeruniqueid:uniueidd, } }}).select({Enrollusers : { $elemMatch : { username : user.name , Customeruniqueid:uniueidd,} }});
+                        console.log(past);
+                        rate=parseInt(userExist1.products[0].noofrating);
+                        rating2= parseInt(userExist1.products[0].rating);
+                        console.log(rating2);
+                        console.log(rate)
+                        console.log(":poppp");
+                        
+                        if(past!=null){
+                            if(past.Enrollusers[0].review=="null") {
+                            rate=rate+1;
+                            rating2=rating2+parseInt(rating);
+                            rating2=parseInt(rating2);
+                            console.log("hello bhaiiii");
+                            console.log(rate);
+                            console.log(rating2);
+                            // ( { dates : { $elemMatch: {  date : { $gte: 'DATE_VALUE' } } } } )
+                            const done =await  ProductReview.updateOne(
+                                {ProductId:courseid, Enrollusers : { $elemMatch : { username : user.name ,Customeruniqueid:uniueidd, } } },
+                                 {$set: {"Enrollusers.$.review": review,"Enrollusers.$.rating": rating}});
+                            // res.setHeader('user',null);
+                            const ff = await Product.updateOne({ "products.$.ProductId": courseid }, {$set: {"products.$.rating": rating2,"products.$.noofrating": rate}})
+                            const gv = await ProductReview.findOne({ProductId: courseid});
+                            console.log(done);
+                            console.log(ff);
+    
+                            res.status(201).send(gv);
+                        }else {
+                            res.status(202).send("bhag");}
+                    } else {
+                        res.status(202).send("bhag");}
+                        
+                      
                     } else {
                         console.log("not find but like ....................");
                         res.status(202).send("bhag");

@@ -128,11 +128,11 @@ userSchema.methods.generateAuthToken = async function () {
     try {
         console.log("enterrrrrrrrrrrrrrrrrrrrrrrr");
         const ttoken = await jwt.sign({ _id: this._id.toString() }, process.env.TOKEN_SECRET, {
-            expiresIn: 60000000
+            expiresIn: "5d"
         });
 
         const retoken = await jwt.sign({ _id: this._id.toString()}, process.env.R_TOKEN_SECRET, {
-            expiresIn: 60000000
+            expiresIn: "5d"
         });
         this.tokens = this.tokens.concat({ token: ttoken });
         this.retokens = this.retokens.concat({ retoken: retoken });

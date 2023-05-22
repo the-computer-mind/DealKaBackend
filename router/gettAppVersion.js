@@ -63,12 +63,15 @@ try{router.post('/getallappversion',  async (req, res ) => {
     if (refer == true) {
         // console.log(User)
         if (devicenum == 1 || devicenum == 2 || devicenum == 3 || devicenum == 4 || devicenum == 0) {
+            const user = await User.findOne({ _id: verifyuser });
             if(multi=="All") {
                     console.log('under appupdatefind');
                     const all_products = await AppUpdate.find();
                     console.log(all_products);
                     res.setHeader('total_products',"information");
-                    res.status(201).send(all_products);
+                    const all_productse= [all_products,user.UserRole,user.UserStatus];
+            
+                    res.status(201).send(all_productse);
             
                 }
 
@@ -78,7 +81,9 @@ try{router.post('/getallappversion',  async (req, res ) => {
                     const all_products = await AppUpdate.find().sort({index:-1}).limit(1)
                     console.log(all_products);
                     res.setHeader('total_products',"information");
-                    res.status(201).send(all_products);
+                    const all_productse= [all_products,user.UserRole,user.UserStatus];
+            
+                    res.status(201).send(all_productse);
                 }
             }
             

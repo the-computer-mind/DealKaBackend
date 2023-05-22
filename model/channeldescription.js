@@ -303,7 +303,7 @@ const channelSchema = new mongoose.Schema({
                 BlogId:{
                     type: String,
                     required: true,
-                    unique: true
+                    
                     
                 },
                 BlogData:{

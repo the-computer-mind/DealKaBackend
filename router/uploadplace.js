@@ -121,7 +121,7 @@ router.post('/uploadplace' , async (req, res) => {
               console.log("user");
               if("size_v<487241590"=="size_v<487241590") { //in bytes
                 console.log("size is perfecttttttttttttttttttt");
-                Place.findOne({ title: jasonn.title }).then(async (videoexist) => {
+                Place.findOne({ title: jasonn.title,location:jasonn.location }).then(async (videoexist) => {
                     console.log(videoexist);
                     if (!videoexist ) {
                         console.log("l1");
