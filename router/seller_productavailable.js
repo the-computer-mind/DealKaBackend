@@ -39,6 +39,7 @@ router.post('/seller_productavailable',  async (req, res ) => {
       console.log(); //this is the productmodel coming from flutter
       console.log("req.body[1]");
         // var newHeaders = headers.split(",");
+        var lastworkdatetime = req.header("Lastworkdate");
       const devicenum = newHeaders[0].slice(1, 2);
       console.log(devicenum);
       process.env.DeviceId=devicenum;
@@ -89,11 +90,12 @@ router.post('/seller_productavailable',  async (req, res ) => {
                     if (0==0) {
                         console.log("saving customerdetails");
                         const customerinfo = await Customer.updateOne({ "uniqueid": product_json.uniqueid },
-                            { "$set": { "Seen_Details": product_json.Seen_Details , "availabilitycheck":product_json.availabilitycheck}, });
+                            { "$set": { "Seen_Details": product_json.Seen_Details , "availabilitycheck":product_json.availabilitycheck ,   "LastUpdateWork": "Avaliable Response From Seller",
+                            "LastUpdatetime": lastworkdatetime,}, });
                         console.log(customerinfo);
 
                         const done = await User.updateOne({ name: product_json.Customername },
-                            { "$push": { "unsendmsg": { "message": "Available_Seller_Response", "incomingsocketid":JSON.stringify(product_json)} }, }, { upsert: false, strict: false });
+                            { "$push": { "unsendmsg": { "message": "Avaliable Response From Seller", "incomingsocketid":JSON.stringify(product_json)} }, }, { upsert: false, strict: false });
                         const user = await User.findOne({ "name": product_json.Customername })
                         console.log(done);
                     

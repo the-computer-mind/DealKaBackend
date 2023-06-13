@@ -34,6 +34,7 @@ router.post('/Delivery_confirmation',  async (req, res ) => {
       console.log(req.header("authorization")+"hiii");
       // console.log(req.header("size") + "hiii");
       var sellerresponse = req.header("buyerresponse");
+      var lastworkdatetime = req.header("Lastworkdate");
       // var page = req.header("page");
       // const productata = JSON.parse(req.body);
       console.log(); //this is the productmodel coming from flutter
@@ -91,7 +92,8 @@ router.post('/Delivery_confirmation',  async (req, res ) => {
                         
                         console.log("saving customerdetails");
                         const customerinfo = await Customer.updateMany({ "uniqueid": product_json.uniqueid },
-                            { "$set": { "Seen_Details": product_json.Seen_Details , "delivered_details":product_json.delivered_details , "isproductok":"Ok" }, });
+                            { "$set": { "Seen_Details": product_json.Seen_Details , "delivered_details":product_json.delivered_details , "isproductok":"Ok",   "LastUpdateWork": "Buyer Confirm The Delivery",
+                            "LastUpdatetime": lastworkdatetime, }, });
                         console.log(customerinfo);
 
                         const done = await User.updateOne({ name: product_json.seller_name },

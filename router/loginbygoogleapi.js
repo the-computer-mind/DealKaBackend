@@ -345,6 +345,7 @@ router.post('/loginbygoogleapi', async (req, res) => {
                         const alltoken = await multiuser(email);
                         console.log(alltoken + "hleooo");
                         res.setHeader('username_useremail',user.name);
+                        res.setHeader('userrole',user.UserRole);
                         res.send(alltoken);
                         return;
 
@@ -362,6 +363,7 @@ router.post('/loginbygoogleapi', async (req, res) => {
 
 
                                 res.setHeader('username_useremail',user.name);
+                                res.setHeader('userrole',user.UserRole);
                                 res.status(201).send(alltoken);
                                 break;
                             }
@@ -375,6 +377,7 @@ router.post('/loginbygoogleapi', async (req, res) => {
                             const alltoken = await multiuser(email);
                             console.log(alltoken + "hleooo");
                             res.setHeader('username_useremail',user.name);
+                            res.setHeader('userrole',user.UserRole);
                             res.send(alltoken);
                             return;
                         }

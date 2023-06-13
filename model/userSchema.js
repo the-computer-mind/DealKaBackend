@@ -119,8 +119,6 @@ const userSchema = new mongoose.Schema({
         
         }
     ],
-
-
 }, );
 
 //creating token of jwt

@@ -7,6 +7,7 @@ const cloudinary = require("../db/cloudinaryconfig");
 const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
+const Razorpay = require('razorpay');
 const streamifier = require("streamifier");
 // const multer = require("multer");
 // const upload = multer();
@@ -16,97 +17,38 @@ app.use(express.json());
 require('../db/conn');
 require('./jwt_auth');
 const User = require('../model/userSchema');
-const Product = require("../model/productSchema");
+const Wallet = require("../model/UserWallet_Model");
 const Customer = require("../model/customers_model");
 const jwtauth = require('./jwt_auth');
 const { json } = require('express');
 
-router.post('/Accept_Query',  async (req, res ) => {
 
-    console.log('connection of Accept_Query');
-    console.log(req.body);
-    // res.status(201).send("url");
-    //validating jwttoken
-    try {
-      console.log("enteringggg to Accept_Query");
-      var newHeaders = [];
-      newHeaders = req.header("authorization").split(",");
-      console.log(req.header("authorization")+"hiii");
-      // console.log(req.header("size") + "hiii");
-      var orderid = req.header("order_id");
-      var page = req.header("page");
-      var Executive_name = req.header("Executive_Name");
-      var lastworkdatetime = req.header("Lastworkdate");
-      // const productata = JSON.parse(req.body);
-      console.log(); //this is the productmodel coming from flutter
-      console.log("req.body[1]");
-        // var newHeaders = headers.split(",");
-      const devicenum = newHeaders[0].slice(1, 2);
-      console.log(devicenum);
-      process.env.DeviceId=devicenum;
-      process.env.jwt_token = newHeaders[1].slice(1,);
-      console.log(process.env.jwt_token);
-      process.env.jwt_retoken = newHeaders[2];
-      process.env.jwt_retoken = process.env.jwt_retoken.slice(1, (process.env.jwt_retoken.length - 1));
-      console.log(process.env.jwt_retoken);
-      console.log(typeof(headers));
-      if (devicenum == 9) {
-              res.status(401).send();
-      }
-  
-      
-  
-      // const {alltoken} = req.get('Authorization');
-      console.log(process.env.jwt_token);
-      console.log('okkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
-      console.log(process.env.jwt_retoken);
-      console.log('okkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
-      //verifying is the jwt valid
-      var refer = await jwtauth();
-      var verifyuser;
-    try {
-        const verifyUser = jwt.verify(process.env.jwt_token, process.env.TOKEN_SECRET);
-        verifyuser = verifyUser;
-    } catch (err) {
-        if (err instanceof jwt.TokenExpiredError) {
-            console.log("ookkk return from user object id verification");
-            refer = false;
-            console.log(err);
-        }
-    }
-    console.log("ok back from jwtauth to logout");
-    const obj = [];
+router.post('/ReferCodeCheck',  async (req, res ) => {
 
-    //removing the token from mongo db
-    // const user = await User.findOne({ token: process.env.jwt_token })
-    if (refer == true) {
+    try {
+    console.log("enteringggg to check my refer code");
+    var type = req.header("type");
+    var refercode = req.header("refercode");
+    // const productata = JSON.parse(req.body);//this is the productmodel coming from flutter
+    console.log("req.body[1]");
+      // var newHeaders = headers.split(",");
+    
+
+    if (true == true) {
         console.log(User)
-        if (devicenum == 1 || devicenum == 2 || devicenum == 3 || devicenum == 4 || devicenum == 0) {
+        if (0 == 0) {
             console.log('under refer==true');
-            var product_json = req.body;
-            console.log(product_json);
-            Customer.findOne({ "uniqueid" :orderid }).then(async (userExist) => {
+            // var product_json = JSON.parse(req.body.json)
+            Wallet.findOne({ "Refercode" : refercode }).then(async (userExist) => {
+                console.log("hello bhaiya");
+                console.log(userExist);
                 if (userExist) {
-                    console.log(userExist);
-                    const upd = await Customer.updateMany({"uniqueid" :orderid} ,{
-                        "isPayaco_Moderator_Assign":true ,
-                        "Hack_Smell": product_json.Hack_Smell,
-                        "Hold": product_json.Hold,
-                        "Current_Assign_Moderator_name": product_json.Current_Assign_Moderator_name,
-                        "Assign_Moderator":product_json.Assign_Moderator,
-                        "LastUpdateWork": "Assign Moderator",
-                        "LastUpdatetime": lastworkdatetime,
-                    });
-                    // const pol = Customer.findOne({"uniqueid" :orderid} );
-                    console.log(upd);
-                    res.status(202).send(userExist);
-                 
-                } else if (!userExist) {
-                    console.log("saving no exist");
-                    // const customer = new Customer(product_json);
-                    // const customerinfo = await customer.save()
-                    // console.log(customerinfo);
-                    res.status(203).send("save");
+                    res.status(201).send("exist");return;
+            
+                    
+                } else  {
+                    console.log("hello not exist");
+                    res.status(202).send("not exist");
                     return;
                 }
             }).catch((err) => {

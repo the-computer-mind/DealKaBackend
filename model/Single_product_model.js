@@ -74,6 +74,10 @@ const singleproductSchema = new mongoose.Schema({
                     sellerresponse: {
                         type: String,
                     },
+                    checkingtime: {
+                        type: String,
+                    },
+
                 }
             ],
             paydetails: [{
@@ -227,6 +231,12 @@ const singleproductSchema = new mongoose.Schema({
                     type: String,
                 },
             }],
+            LastUpdateWork: {
+                type: String,
+            },
+            LastUpdatetime: {
+                type: String,
+            },
 
 
 

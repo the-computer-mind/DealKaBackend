@@ -353,6 +353,7 @@ router.post('/login', async (req, res) => {
                         const alltoken = await multiuser(email);
                         console.log(alltoken + "hleooo");
                         res.setHeader('username_useremail',user.name);
+                        res.setHeader('userrole',user.UserRole);
                         res.send(alltoken);
                         return;
 
@@ -368,6 +369,7 @@ router.post('/login', async (req, res) => {
                                 const alltoken = await mdusers(email, i);
                                 console.log(alltoken);
                                 res.setHeader('username_useremail',user.name);
+                                res.setHeader('userrole',user.UserRole);
                                 res.status(201).send(alltoken);
                                 break;
                             }
@@ -381,6 +383,7 @@ router.post('/login', async (req, res) => {
                              const alltoken = await multiuser(email);
                              console.log(alltoken + "hleooo");
                              res.setHeader('username_useremail',user.name);
+                             res.setHeader('userrole',user.UserRole);
                              res.send(alltoken);
                              return;
                             // res.status(230).send("You Already Logged In On 5 Device Logout First");

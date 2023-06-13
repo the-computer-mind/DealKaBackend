@@ -203,7 +203,8 @@ router.post('/buyproduct' , async (req, res) => {
 
 
                         const customerinfo = await Customer.updateOne({ "uniqueid": uniueidd },
-                        { "$set": { "Seen_Details": jasonn.Seen_Details }, });
+                        { "$set": { "Seen_Details": jasonn.Seen_Details ,   "LastUpdateWork": "Buy",
+                        "LastUpdatetime": jasonn.paydetails[0].paydate, }, });
                         
                             const mdone = await Customer.updateOne({ uniqueid: uniueidd },
                                 { "$push": { "adderess_details":
@@ -244,9 +245,7 @@ router.post('/buyproduct' , async (req, res) => {
                             console.log(user);
                 
                             global.io.to(user.socketid).emit("newmessage",  user.unsendmsg , async function( error ,messag ) {
-                                    console.log('messag is', messag);
-                                 
-                            } );
+                                    console.log('messag is', messag); } );
                             
                     ///// 
                     /////
@@ -255,7 +254,10 @@ router.post('/buyproduct' , async (req, res) => {
                     /////       
         
                               
-                            }
+                            } else {
+                                global.io.to(user.socketid).emit("newmessage",  user.unsendmsg , async function( error ,messag ) {
+                                                                            console.log('messag is', messag); } );
+                           };
                             const buyd = await Customer.findOne({ uniqueid: uniueidd },);
                             res.status(201).send(buyd);
                     } else if(!videoexist){

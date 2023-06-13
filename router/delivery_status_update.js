@@ -35,6 +35,7 @@ router.post('/Delivery_Response',  async (req, res ) => {
       // console.log(req.header("size") + "hiii");
       var sellerresponse = req.header("sellerresponse");
       var cancle = req.header("cancle");
+      var lastworkdatetime = req.header("Lastworkdate");
       // const productata = JSON.parse(req.body);
       console.log(); //this is the productmodel coming from flutter
       console.log("req.body[1]");
@@ -94,11 +95,12 @@ router.post('/Delivery_Response',  async (req, res ) => {
                         
                         console.log("saving customerdetails");
                         const customerinfo = await Customer.updateMany({ "uniqueid": product_json.uniqueid },
-                            { "$set": { "Seen_Details": product_json.Seen_Details ,"shippmemt_details": product_json.shippmemt_details , "delivered_details":product_json.delivered_details , "isproduct_dispatch":"Yes"}, });
+                            { "$set": { "Seen_Details": product_json.Seen_Details ,"shippmemt_details": product_json.shippmemt_details , "delivered_details":product_json.delivered_details , "isproduct_dispatch":"Yes",  "LastUpdateWork": "Seller Delivered The Product",
+                            "LastUpdatetime": lastworkdatetime,}, });
                         console.log(customerinfo);
 
                         const done = await User.updateOne({ name: product_json.Customername },
-                            { "$push": { "unsendmsg": { "message": "Seller_Delivered_Response", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                            { "$push": { "unsendmsg": { "message": "Seller Delivered The Product", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                         const user = await User.findOne({ "name": product_json.Customername })
                         console.log(done);
                     
@@ -181,11 +183,12 @@ router.post('/Delivery_Response',  async (req, res ) => {
                         
                             console.log("saving cacle is true");
                             const customerinfo = await Customer.updateMany({ "uniqueid": product_json.uniqueid },
-                                { "$set": { "Seen_Details": product_json.Seen_Details , "delivered_details":product_json.delivered_details , "isproduct_dispatch":"Cancel",isMoney_refunded:true}, });
+                                { "$set": { "Seen_Details": product_json.Seen_Details , "delivered_details":product_json.delivered_details , "isproduct_dispatch":"Cancel",isMoney_refunded:true,  "LastUpdateWork": "Seller Cancel The Product",
+                                "LastUpdatetime": lastworkdatetime,}, });
                             console.log(customerinfo);
     
                             const done = await User.updateOne({ name: product_json.Customername },
-                                { "$push": { "unsendmsg": { "message": "Seller_Cancel_Delivered_Response", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                                { "$push": { "unsendmsg": { "message": "Seller Cancel The Product", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                             const user = await User.findOne({ "name": product_json.Customername })
                             console.log(done);
                         

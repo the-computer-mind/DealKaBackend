@@ -124,15 +124,16 @@ router.post('/generateorderid' , async (req, res) => {
               
               console.log(user.name);
               console.log(unique_id);
+
               const coursemtch = await Customer.findOne({uniqueid:unique_id});
               console.log("cy"+typeof(coursemtch)+"yc");
               console.log("cy"+coursemtch+"yc");
              if(forwhat=="Order"){ 
-              const fir = await Product.updateOne({ ProductId:courseid});
+              const fir = await Product.findOne({ ProductId:courseid});
               console.log(fir);
-              console.log(fir.ProductStock);
+              console.log(fir.products[0].ProductStock);
               console.log("fir");
-              if(fir.ProductStock<parseInt(quantity)) {
+              if(fir.products[0].ProductStock<parseInt(quantity)) {
                 res.status(204).send("error!");
               }};
               if(coursemtch==null) { //in bytes

@@ -39,6 +39,7 @@ router.post('/productavailable',  async (req, res ) => {
       console.log(); //this is the productmodel coming from flutter
       console.log("req.body[1]");
         // var newHeaders = headers.split(",");
+        var lastworkdatetime = req.header("Lastworkdate");
       const devicenum = newHeaders[0].slice(1, 2);
       console.log(devicenum);
       process.env.DeviceId=devicenum;
@@ -84,9 +85,21 @@ router.post('/productavailable',  async (req, res ) => {
             var product_json = req.body;
             Customer.findOne({ "orderid" : product_json.orderid }).then(async (userExist) => {
                 if (userExist) {
-                    console.log(userExist)
+                    console.log(userExist);
+                    console.log("hello dear brother");
+                    console.log(product_json.availabilitycheck[0]);
+                    console.log(userExist.uniqueid);
                     if(userExist.ispaid!=true) {
-                        res.status(202).send(userExist);
+                        const mdone3 = await Customer.updateOne({ uniqueid: userExist.uniqueid},
+                            { "$push": { "availabilitycheck": product_json.availabilitycheck[0] }},  {upsert:false,strict:false});
+                            const fdone3 = await Customer.updateOne({ uniqueid: userExist.uniqueid},
+                                { "$set": {   "LastUpdateWork": "IsAvailable",
+                                "LastUpdatetime": lastworkdatetime, }},);
+                                console.log(fdone3);
+                        console.log(mdone3);
+
+                        const mdone5 = await Customer.findOne({ uniqueid: userExist.uniqueid });
+                        res.status(202).send(mdone5);
                         return;
                     }
                     else {

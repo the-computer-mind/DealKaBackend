@@ -33,10 +33,10 @@ router.post('/Productopen_req',  async (req, res ) => {
       newHeaders = req.header("authorization").split(",");
       console.log(req.header("authorization")+"hiii");
       // console.log(req.header("size") + "hiii");
-      var orderid = req.header("order_id");
+      var orderid = req.header("orderid");
       var page = req.header("page");
       // const productata = JSON.parse(req.body);
-      console.log(); //this is the productmodel coming from flutter
+      console.log(orderid); //this is the productmodel coming from flutter
       console.log("req.body[1]");
         // var newHeaders = headers.split(",");
       const devicenum = newHeaders[0].slice(1, 2);
@@ -51,9 +51,9 @@ router.post('/Productopen_req',  async (req, res ) => {
       if (devicenum == 9) {
               res.status(401).send();
       }
-  
-      
-  
+
+
+
       // const {alltoken} = req.get('Authorization');
       console.log(process.env.jwt_token);
       console.log('okkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
@@ -83,11 +83,14 @@ router.post('/Productopen_req',  async (req, res ) => {
             console.log('under refer==true');
             var product_json = req.body;
             console.log(product_json);
+            console.log(product_json);
             Customer.findOne({ "uniqueid" :orderid }).then(async (userExist) => {
+                console.log(userExist);
+                console.log("userrrrrrr");
                 if (userExist) {
                     console.log(userExist);
                     res.status(202).send(userExist);
-                 
+
                 } else if (!userExist) {
                     console.log("saving no exist");
                     // const customer = new Customer(product_json);
@@ -101,12 +104,12 @@ router.post('/Productopen_req',  async (req, res ) => {
                 res.status(500).send("Somethig Wrong");
                 return;
             });
-            
 
-        } 
+
+        }
     } else if (refer == false) {
         // console.log(User)
-        // const done = await User.updateOne({ "tokens.token": process.env.jwt_token }, 
+        // const done = await User.updateOne({ "tokens.token": process.env.jwt_token },
         // { "$set": { "tokens.$.token": "null" } }) //if you don't know the exact value give $
         // User.save
         // console.log(done);
@@ -116,19 +119,19 @@ router.post('/Productopen_req',  async (req, res ) => {
         res.status(200).send("token code expire but refresh work");
         return;
     } else if (refer == 2) {
-        
+
         console.log("done");
-       
+
         try {
                 if (devicenum == 0) {
                   console.log("yes jwt token is not expired");
-                  const done = await User.updateOne({ "tokens.token": process.env.jwt_token }, //first previou one whch you want to remove 
+                  const done = await User.updateOne({ "tokens.token": process.env.jwt_token }, //first previou one whch you want to remove
                       { "$set": { "tokens.$.token": "null" } });
                   console.log(done);
                   const mdone = await User.updateOne({ "retokens.retoken": process.env.jwt_retoken },
                       { "$set": { "retokens.$.retoken": "null" } });
                   console.log(mdone);
-                  
+
               } else if (devicenum == 1) {
                   console.log("user");
                   const done = await User.updateOne({ "tokens.0.md1token": process.env.jwt_token },
@@ -176,13 +179,13 @@ router.post('/Productopen_req',  async (req, res ) => {
     //deleting the value from mongodb
 
 
-    
+
 
 
     // if(!email || !password){
     //     return res.send.json({error: "plz type all field"});
     // };
-    
+
 });
 
 

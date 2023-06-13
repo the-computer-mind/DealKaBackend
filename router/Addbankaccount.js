@@ -17,28 +17,24 @@ require('../db/conn');
 require('./jwt_auth');
 const User = require('../model/userSchema');
 const Product = require("../model/productSchema");
-const Customer = require("../model/customers_model");
+const UserBankAccount = require("../model/UserBankAccountModel");
 const jwtauth = require('./jwt_auth');
 const { json } = require('express');
 
-router.post('/Accept_Query',  async (req, res ) => {
+router.post('/AddanewbankAcc',  async (req, res ) => {
 
-    console.log('connection of Accept_Query');
+    console.log('connection of addnewbank');
     console.log(req.body);
     // res.status(201).send("url");
     //validating jwttoken
     try {
-      console.log("enteringggg to Accept_Query");
+      console.log("enteringggg to addnewbank");
       var newHeaders = [];
       newHeaders = req.header("authorization").split(",");
       console.log(req.header("authorization")+"hiii");
       // console.log(req.header("size") + "hiii");
-      var orderid = req.header("order_id");
-      var page = req.header("page");
-      var Executive_name = req.header("Executive_Name");
-      var lastworkdatetime = req.header("Lastworkdate");
-      // const productata = JSON.parse(req.body);
-      console.log(); //this is the productmodel coming from flutter
+      var username = req.header("username");
+      var type = req.header("type");
       console.log("req.body[1]");
         // var newHeaders = headers.split(",");
       const devicenum = newHeaders[0].slice(1, 2);
@@ -83,37 +79,41 @@ router.post('/Accept_Query',  async (req, res ) => {
         console.log(User)
         if (devicenum == 1 || devicenum == 2 || devicenum == 3 || devicenum == 4 || devicenum == 0) {
             console.log('under refer==true');
-            var product_json = req.body;
-            console.log(product_json);
-            Customer.findOne({ "uniqueid" :orderid }).then(async (userExist) => {
-                if (userExist) {
-                    console.log(userExist);
-                    const upd = await Customer.updateMany({"uniqueid" :orderid} ,{
-                        "isPayaco_Moderator_Assign":true ,
-                        "Hack_Smell": product_json.Hack_Smell,
-                        "Hold": product_json.Hold,
-                        "Current_Assign_Moderator_name": product_json.Current_Assign_Moderator_name,
-                        "Assign_Moderator":product_json.Assign_Moderator,
-                        "LastUpdateWork": "Assign Moderator",
-                        "LastUpdatetime": lastworkdatetime,
-                    });
-                    // const pol = Customer.findOne({"uniqueid" :orderid} );
-                    console.log(upd);
-                    res.status(202).send(userExist);
-                 
-                } else if (!userExist) {
-                    console.log("saving no exist");
-                    // const customer = new Customer(product_json);
-                    // const customerinfo = await customer.save()
-                    // console.log(customerinfo);
-                    res.status(203).send("save");
-                    return;
-                }
-            }).catch((err) => {
-                console.log(err);
-                res.status(500).send("Somethig Wrong");
-                return;
-            });
+        var jasonn= req.body;
+          const user = await User.findOne({ "name": username });
+          console.log(username);
+          console.log(user);
+          console.log(jasonn);
+          
+          if(user.UserRole=="Normal") {
+            const done = await User.updateOne({ name: username},
+                { "$set": {UserRole:"Seller" }});
+                console.log(done);
+            const mddone = new UserBankAccount({
+                name: username ,
+                ListOfUserBAnkAccount:[jasonn] 
+                
+                });
+                const buyinfo = await mddone.save();
+                console.log("hello byby");
+                console.log(buyinfo);
+                const latestbank = await UserBankAccount.findOne({  name: username });
+                res.status(201).send(latestbank);
+          } else if (user.UserRole=="Seller") {
+            if(type != "Create"){const mdone2 = await UserBankAccount.updateOne({  name: username },
+                { "$push": { "ListOfUserBAnkAccount":
+                  jasonn }},  {upsert:false,strict:false});
+            console.log(mdone2);
+            const latestbank = await UserBankAccount.findOne({  name: username });
+            res.status(202).send(latestbank);} else {
+                res.status(206).send("already added");
+            }
+
+          } else {
+            res.status(204).send("different");
+          }
+            
+            
             
 
         } 

@@ -33,7 +33,7 @@ router.post('/Sharingproductmodel',  async (req, res ) => {
       newHeaders = req.header("authorization").split(",");
       console.log(req.header("authorization")+"hiii");
       // console.log(req.header("size") + "hiii");
-      var orderid = req.header("order_id");
+      var orderid = req.header("orderid");
       console.log("req.body[1]");
         // var newHeaders = headers.split(",");
       const devicenum = newHeaders[0].slice(1, 2);

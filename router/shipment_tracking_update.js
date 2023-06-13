@@ -32,6 +32,7 @@ router.post('/Shipment_Tracking_update',  async (req, res ) => {
       var newHeaders = [];
       newHeaders = req.header("authorization").split(",");
       console.log(req.header("authorization")+"hiii");
+      var lastworkdatetime = req.header("Lastworkdate");
       // console.log(req.header("size") + "hiii");
       var sellerresponse = req.header("sellerresponse");
       var cancle = req.header("cancle");
@@ -94,13 +95,14 @@ router.post('/Shipment_Tracking_update',  async (req, res ) => {
                         
                         console.log("saving customerdetails");
                         const customerinfo = await Customer.updateMany({ "uniqueid": product_json.uniqueid },
-                            { "$set": {"shippmemt_details": product_json.shippmemt_details , "isproductshipped":true
+                            { "$set": {"shippmemt_details": product_json.shippmemt_details , "isproductshipped":true ,   "LastUpdateWork": "Tracking Details Updated",
+                            "LastUpdatetime": lastworkdatetime,
                         }, });
                         console.log(customerinfo);
                         
 
                         const done = await User.updateOne({ name: product_json.Customername },
-                            { "$push": { "unsendmsg": { "message": "Seller_tracking_update", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                            { "$push": { "unsendmsg": { "message": "Tracking Details Updated", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                         const user = await User.findOne({ "name": product_json.Customername })
                         console.log(done);
                     

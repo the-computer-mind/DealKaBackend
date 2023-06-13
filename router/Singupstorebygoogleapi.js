@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const otpgenerator = require("otp-generator"); 
 const userSchema = require('../model/userSchema');
 const Channel = require('../model/channeldescription');
-
+const Wallet = require('../model/UserWallet_Model');
 
 //firebase settings for otpsend
 // const admin = require("firebase-admin");
@@ -31,7 +31,10 @@ router.post('/storeuserbygoogleapi', async (req, res) => {
             console.log(email);
             console.log(req.body);
             var date = req.header("Date");
+            var refercode = req.header("refercode");
+            var refertime = req.header("refertime");
             var profilepic = req.header("ProfilePicture");
+            var refertomodel = req.header("refertomodel");
             console.log(date + "time");
             console.log("storeuserbygoogleapi" + name.toLowerCase());
 
@@ -60,11 +63,11 @@ router.post('/storeuserbygoogleapi', async (req, res) => {
                         console.log("namewwwwwwwwwwww" + namelower);
                         const salt = await bcrypt.genSalt(10);
                         const hashedPasswd = await bcrypt.hash(password,salt);
-                        password=hashedPasswd;
-                        cpassword=hashedPasswd;
+                        // password=hashedPasswd;
+                        // cpassword=hashedPasswd;
                         
 
-                        const user = new User({ name: namelower, email: email, password: password, cpassword: cpassword,UserRole:"Moderator",UserVerified:"No"});
+                        const user = new User({ name: namelower, email: email, password: hashedPasswd, cpassword: hashedPasswd,UserRole:"Normal",UserVerified:"No"});
                         
                         const alltoken = await user.generateAuthToken();
                         console.log("google iiiii good");
@@ -76,17 +79,58 @@ router.post('/storeuserbygoogleapi', async (req, res) => {
                         // const user = new User({ name, email: email.toLowerCase()(), password, cpassword});
                         // const token = user.generateAuthToken();
                         // console.log('okeetioooooooo')
-                        const channel = new Channel({ name: namelower, ChannelStatus: 'Moderator', ChannelLastActivatitydate:date,ChannelProfilePicLink: profilepic==""?"https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg":profilepic,ChannelbannerPicLink:"https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg",ChannelDescription:"Hey I created This Channel To Gain Knowladge",TotalChannelWatchTime:"0",TotalChannelViews:0,channelcreateddate:date,channeltags:namelower,channeluniquelink:'null',channellevel:'0',TotalNoOfSubscriber:0});
+                        const channel = new Channel({ name: namelower, ChannelStatus: 'Normal', ChannelLastActivatitydate:date,ChannelProfilePicLink: profilepic==""?"https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg":profilepic,ChannelbannerPicLink:"https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg",ChannelDescription:"Hey I created This Channel To Gain Knowladge",TotalChannelWatchTime:"0",TotalChannelViews:0,channelcreateddate:date,channeltags:namelower,channeluniquelink:'null',channellevel:'0',TotalNoOfSubscriber:0});
                         const channelinfo = await channel.save().then(() => {
                             console.log(channel.name);
                         }).catch((err) =>
                             console.log(err));
                             console.log(channelinfo);
-                        const userinfo = await user.save().then(() => {
+                        const userinfo = await user.save().then(async () => {
+                            var refercodenew = "rc"+namelower.replace(/\s+/g, '');
+                            Wallet.findOne({ "Refercode" : refercode }).then(async (userExist) => {
+                                console.log("hello bhaiya");
+                                console.log(refercode);
+                                console.log(userExist);
+                                if (userExist) {
+                                    var referto = JSON.parse(refertomodel);
+                                    console.log(referto);
+                                    if(userExist.TotalNumberOfRefer==null || userExist.TotalNumberOfRefer=="") {
+                                        userExist.TotalNumberOfRefer="0";
+                                    }
+                                    var nooo = parseInt(userExist.TotalNumberOfRefer);
+                                    console.log(nooo);
+                                    var koo = nooo+1;
+                                    
+                                    var ref = await Wallet.updateMany({ "Refercode" : refercode }, {"$set":{
+                                        TotalNumberOfRefer:koo,
+                                    }});
+                                    console.log(ref);
+                                    const mdone2 = await Wallet.updateOne({  "Refercode" : refercode  },
+                                        { "$push": { "ReferTo":
+                                        referto }},  {upsert:false,strict:false});
+                                        console.log(mdone2);  
+                                    console.log(ref);
+                                    
+                                    
+                                } else  {
+                                    refercode="null";
+                                }
+                            }).catch((err) => {
+                                console.log(err);
+                                res.status(500).send("Somethig Wrong line 103 signupstore");
+                                return;
+                            });
+                            const wallet = new Wallet({WalletId:namelower,Refercode:refercodenew,referBy:refercode,referTime:refertime,CurrentWalletBalance:"0",TotalNumberOfRefer:"0"});
+                            const walletinfo = await wallet.save();
+                            console.log(walletinfo);
+                            console.log(refercodenew);
                             console.log(typeof (alltoken));
                             console.log("josjsj");
+
                             // var username_useremail= [name,email]
                             res.setHeader('username_useremail', namelower);
+                            res.setHeader('userrole',"Normal");
+                            res.setHeader('refercode',refercodenew);
                             res.send(alltoken);
                             // res.status(200).send("alll ok")
                             // console.log(user._id);

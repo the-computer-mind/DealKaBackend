@@ -42,9 +42,17 @@ const { CLIENT_RENEG_LIMIT } = require('tls');
 
 var clients = {};
 var server = http.createServer(app);
-const io = require('socket.io')(server,{
+var ioApp = http.createServer(app);
+
+const io = require('socket.io')(ioApp,{
   'pingInterval': 6000,
-  'pingTimeout': 10000
+  'pingTimeout': 10000,
+  'transports': ['websocket','polling'],
+  cors: true, 
+  origin:true, 
+  allowEIO3: true,
+  //"path": '/socket.io'
+  //resource: '/foo/bar/socket.io'
 
 });
 global.io = io;
@@ -62,7 +70,9 @@ function st() {
     require("./db/conn");
     //using middleware we execute this from auth to here require function is like next()
     app.use(require("./router/auth"));
+    app.use(require("./router/refercheck"));
     app.use(require("./router/verifyotp"));
+    app.use(require("./router/login_load_test"));
     
     app.use(require("./router/login"));
     app.use(require("./router/productadd"));
@@ -104,6 +114,8 @@ function st() {
     app.use(require('./router/Update_Refund_Result')); 
     app.use(require('./router/getallbanners')); 
     app.use(require('./router/addnewbanners')); 
+    app.use(require('./router/Addbankaccount')); 
+    app.use(require('./router/Singupstorebygoogleapi')); 
     //socket io program start ......
     //socket io program start ......
 
@@ -146,7 +158,7 @@ function st() {
   // var redisClient = redis.createClient('192.168.31.202', 6379);
   
               
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 8000;
     const Url = process.env.Node_url;
     //exporting user model file
     //const User = require('./model/userSchema');
@@ -169,7 +181,7 @@ function st() {
     if(numCpu==1) {
       core=1;
     }else{
-      core=numCpu;
+      core=1;
     }
 
 
@@ -447,14 +459,14 @@ function st() {
       ////socket 
         
       });
-      server.listen(process.env.PORT || 8000 ,() => {
+      server.listen(process.env.PORT || 8000 ,"192.168.31.202",() => {
         console.log(`server started at ${process.env.PORT} and the PID:-- ${process.pid}`);
       
-        
-      // server.listen(8000, () => {
-      //     console.log('listening on *:8000');
-      //   });
-    })
+         });
+      ioApp.listen( 3000 ,"192.168.31.202",() => {
+          console.log(`server started at 3000 socket`);
+        })
+
     };
 
 

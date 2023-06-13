@@ -29,6 +29,7 @@ router.post('/QueryAdd',upload.array("image",3),  async (req, res ) => {
     var type = req.header("type");
     var isrefundsellerresponse = req.header("isrefundsellerresponse");
     var indexx = parseInt(req.header("indexx"), 10);
+    var lastworkdatetime = req.header("Lastworkdate");
     var newHeaders = [];
     newHeaders = req.header("authorization").split(",");
     console.log(req.header("authorization")+"hiii");
@@ -110,12 +111,13 @@ router.post('/QueryAdd',upload.array("image",3),  async (req, res ) => {
                     }else {
                         product_json.not_recived_query[indexx].buyer_query[0].query_photos_link=imageurl;}
                     const customerinfo = await Customer.updateOne({ "uniqueid": product_json.uniqueid },
-                            { "$set": { "not_recived_query": product_json.not_recived_query ,  "Seen_Details": product_json.Seen_Details,  //"isRefundQuaery_raised":true
+                            { "$set": { "not_recived_query": product_json.not_recived_query ,  "Seen_Details": product_json.Seen_Details,    "LastUpdateWork": type=="seller"?"Seller Answer Your Query":"Buyer Raised A Query",
+                            "LastUpdatetime": lastworkdatetime, //"isRefundQuaery_raised":true
                         }, });
                     console.log(customerinfo);
 
                     const done = await User.updateOne({ name: type=="seller"? product_json.Customername:product_json.seller_name },
-                        { "$push": { "unsendmsg": { "message": type=="seller"?"Seller_not_receive_query":"Buyer_seller_not_receive_query", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                        { "$push": { "unsendmsg": { "message": type=="seller"?"Seller Answer Your Query":"Buyer Raised A Query", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                    
                     console.log(done);
                     }
@@ -123,11 +125,12 @@ router.post('/QueryAdd',upload.array("image",3),  async (req, res ) => {
                     else if(isrefundsellerresponse=="true") {
                         product_json.refundquery_seller_response[0].query_photos_link=imageurl;
                         const customerinfo = await Customer.updateOne({ "uniqueid": product_json.uniqueid },
-                        { "$set": { "refundquery_seller_response": product_json.refundquery_seller_response ,  "Seen_Details": product_json.Seen_Details }, });
+                        { "$set": { "refundquery_seller_response": product_json.refundquery_seller_response ,  "Seen_Details": product_json.Seen_Details,   "LastUpdateWork":  type=="seller"?"Seller Response On 2nd Query":"Buyer Raised Refund Query",
+                        "LastUpdatetime": lastworkdatetime, }, });
                         console.log(customerinfo);
 
                         const done = await User.updateOne({ name: type=="seller"? product_json.Customername:product_json.seller_name },
-                            { "$push": { "unsendmsg": { "message": type=="seller"?"Seller_refundquery_seller_response":"Buyer_refundquery_seller_response", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                            { "$push": { "unsendmsg": { "message": type=="seller"?"Seller Response On 2nd Query":"Buyer Raised Refund Query", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                         console.log(done);
                     }
                 

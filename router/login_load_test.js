@@ -349,6 +349,7 @@ router.get('/login_load', async (req, res) => {
                         const alltoken = await multiuser(email);
                         console.log(alltoken + "hleooo");
                         res.setHeader('username_useremail',user.name);
+                        res.setHeader('userrole',user.UserRole);
                         res.send(alltoken);
                         return;
 

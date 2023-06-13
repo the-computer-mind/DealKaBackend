@@ -76,7 +76,76 @@ const OnlyproductSchema = new mongoose.Schema({
 //making the user data representation
 const CustomerSchema = new mongoose.Schema({
     product:[
-        OnlyproductSchema
+        {
+            ProductId: {
+                type: String,
+                required:true,
+            },
+            type: {
+                type: String,
+                required:true,
+            },
+            catagory: {
+                type: String,
+                required:true,
+            },
+            status: {
+                type: String,
+                required:true,
+            },
+            discount:{
+                type: String,
+                required:true,
+            },
+            discountedprice: {
+                type: String,
+                required:true,
+            },
+            listing: {
+                type: String,
+                required:true,
+            },
+            ProductName: {
+            type: String,
+            required: true
+            },
+            ProductDescription: {
+                type: String,
+                required: true
+            },
+            ProductPrice: {
+                type: Number,
+                required: true
+            },
+            ProductStock: {
+                type: Number,
+                required: true
+            },
+            ProductImageUrl: {
+                type: Array,
+                required: true
+            },
+            state: {
+                type: String,
+                required:true
+            },
+            noofrating: {
+                type: String,
+                required:true
+            },
+            rating: {
+                type: String,
+                required:true
+            },
+            Date_Time: {
+                type: String,
+                required: true
+            },
+            ProductLink: {
+                type: String,
+                required: true
+            }
+        }
     ],
     Maxqnty_per_buyer: {
         type: String,
@@ -173,6 +242,9 @@ const CustomerSchema = new mongoose.Schema({
                 type: String,
             },
             sellerresponse: {
+                type: String,
+            },
+            checkingtime: {
                 type: String,
             },
         }
@@ -439,6 +511,12 @@ const CustomerSchema = new mongoose.Schema({
             type: String,
         },
     }],
+    LastUpdateWork: {
+        type: String,
+    },
+    LastUpdatetime: {
+        type: String,
+    },
 })
 
 module.exports = Customersdetails = mongoose.model('customersdetails', CustomerSchema);

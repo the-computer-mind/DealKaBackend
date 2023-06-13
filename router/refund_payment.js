@@ -87,6 +87,7 @@ router.post('/refund_payment_update',upload.array("image",3) , async (req, res) 
     var username = req.header("Username");
     var uniueidd = req.header("uniqueid");
     var qnt = req.header("qnty");
+    var lastworkdatetime = req.header("Lastworkdate");
     // res.status(201).send("url");
     //validating jwttoken
     try {
@@ -205,7 +206,8 @@ router.post('/refund_payment_update',upload.array("image",3) , async (req, res) 
                     console.log( jasonn.raised_refund_quaery[0].query_photos_link);
                     jasonn.raised_refund_quaery[0].query_photos_link=imageurl;
                     const customerinfo = await Customer.updateMany({ "uniqueid": uniueidd },
-                        { "$set": { "Seen_Details": jasonn.Seen_Details,"raised_refund_quaery": jasonn.raised_refund_quaery,"isRefundQuaery_raised":true,"paydetails": jasonn.paydetails,
+                        { "$set": { "Seen_Details": jasonn.Seen_Details,"raised_refund_quaery": jasonn.raised_refund_quaery,"isRefundQuaery_raised":true,"paydetails": jasonn.paydetails,   "LastUpdateWork": "Refund_Raised",
+                        "LastUpdatetime": lastworkdatetime,
                      }, });
                         
                     const done = await User.updateOne({ name: jasonn.seller_name },

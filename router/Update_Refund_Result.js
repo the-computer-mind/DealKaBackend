@@ -34,6 +34,7 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
     var index =  parseInt(req.header("index"), 10);
     var newHeaders = [];
     newHeaders = req.header("authorization").split(",");
+    var lastworkdatetime = req.header("Lastworkdate");
     console.log(req.header("authorization")+"hiii");
     // const productata = JSON.parse(req.body);
     console.log(JSON.parse(req.body.json)); //this is the productmodel coming from flutter
@@ -112,7 +113,8 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
                     product_json.final_refund_query_result[index].query_photos_link=imageurl;
                         
                     const customerinfo = await Customer.updateMany({ "uniqueid": product_json.uniqueid },
-                            { "$set": { "final_refund_query_result": product_json.final_refund_query_result ,  "Assign_Moderator": product_json.Assign_Moderator,  "isMoney_refunded": product_json.isMoney_refunded, "issellerscammer": product_json.issellerscammer,"iscustomerscammer": product_json.iscustomerscammer,"isrefund_rejected": product_json.isrefund_rejected ,  //"isRefundQuaery_raised":true
+                            { "$set": { "final_refund_query_result": product_json.final_refund_query_result ,  "Assign_Moderator": product_json.Assign_Moderator,  "isMoney_refunded": product_json.isMoney_refunded, "issellerscammer": product_json.issellerscammer,"iscustomerscammer": product_json.iscustomerscammer,"isrefund_rejected": product_json.isrefund_rejected ,   "LastUpdateWork": "DealKaro Response To Seller",
+                            "LastUpdatetime": lastworkdatetime,  //"isRefundQuaery_raised":true
                         }, });
 
                         console.log("ismoney refunded");
@@ -162,7 +164,8 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
                                     console.log("kk");
         
                                     const customerinfo5 = await Customer.updateOne({ "uniqueid": product_json.uniqueid },
-                                    { "$set": { "transaction_closed": true //"isRefundQuaery_raised":true
+                                    { "$set": { "transaction_closed": true  , "LastUpdateWork": "Money Refunded",
+                                    "LastUpdatetime": lastworkdatetime,//"isRefundQuaery_raised":true 
                                 }, });
                                 }
         
@@ -176,9 +179,9 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
                     console.log(customerinfo);
 
                     const done = await User.updateOne({ name:product_json.seller_name },
-                        { "$push": { "unsendmsg": { "message": "Payoco_Response_seller", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                        { "$push": { "unsendmsg": { "message": "DealKaro Response To Seller", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                         const done2 = await User.updateOne({ name:product_json.Customername },
-                            { "$push": { "unsendmsg": { "message": "Payoco_Response_buyer", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                            { "$push": { "unsendmsg": { "message": "DeBuyer Raised 2nd Query", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                        
                     console.log(done);
                     console.log(done2);
@@ -191,7 +194,8 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
                         product_json.second_raised_refund_quaery[product_json.second_raised_refund_quaery
                             .length-1].Payoco_response[0].query_photos_link=imageurl;
                         const customerinfo = await Customer.updateMany({ "uniqueid": product_json.uniqueid },
-                        { "$set": { "second_raised_refund_quaery": product_json.second_raised_refund_quaery , }, });
+                        { "$set": { "second_raised_refund_quaery": product_json.second_raised_refund_quaery ,  "LastUpdateWork": "DealKaro Ask Query",
+                        "LastUpdatetime": lastworkdatetime, }, });
                         console.log(customerinfo);
 
                         console.log("ismoney refunded");
@@ -200,9 +204,9 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
                         console.log(customerinfo);
 
                         const done = await User.updateOne({ name:product_json.seller_name },
-                            { "$push": { "unsendmsg": { "message": "Payoco_Response_seller", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                            { "$push": { "unsendmsg": { "message": "DealKaro Response To Seller", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                             const done2 = await User.updateOne({ name:product_json.Customername },
-                                { "$push": { "unsendmsg": { "message": "Payoco_Response_buyer", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                                { "$push": { "unsendmsg": { "message": "DealKaro Response To Buyer", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                         
                         console.log(done);
                         console.log(done2);
@@ -211,7 +215,8 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
                             console.log("he;lo ")
                         product_json.second_raised_refund_quaery[index].seller_response[0].query_photos_link=imageurl;
                         const customerinfo = await Customer.updateMany({ "uniqueid": product_json.uniqueid },
-                        { "$set": { "second_raised_refund_quaery": product_json.second_raised_refund_quaery , }, });
+                        { "$set": { "second_raised_refund_quaery": product_json.second_raised_refund_quaery ,   "LastUpdateWork": "Seller Answer 2nd Query",
+                        "LastUpdatetime": lastworkdatetime,}, });
                         console.log(customerinfo);
 
                         console.log("ismoney refunded");
@@ -222,7 +227,7 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
                        // const done = await User.updateOne({ name:product_json.seller_name },
                            // { "$push": { "unsendmsg": { "message": "Seller_Response_seller", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                             const done2 = await User.updateOne({ name:product_json.Customername },
-                                { "$push": { "unsendmsg": { "message": "Seller_Response_buyer", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                                { "$push": { "unsendmsg": { "message": "Seller Answer 2nd Query", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                         
                         //console.log(done);
                         console.log(done2);
@@ -231,7 +236,8 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
                             console.log("he;lo ")
                         product_json.second_raised_refund_quaery[index].buyer_response[0].query_photos_link=imageurl;
                         const customerinfo = await Customer.updateMany({ "uniqueid": product_json.uniqueid },
-                        { "$set": { "second_raised_refund_quaery": product_json.second_raised_refund_quaery , }, });
+                        { "$set": { "second_raised_refund_quaery": product_json.second_raised_refund_quaery ,  "LastUpdateWork": "Buyer Raised 2nd Query",
+                        "LastUpdatetime": lastworkdatetime, }, });
                         console.log(customerinfo);
 
                         console.log("ismoney refunded");
@@ -240,9 +246,9 @@ router.post('/UpdateRefundResult',upload.array("image",3),  async (req, res ) =>
                         console.log(customerinfo);
 
                         const done = await User.updateOne({ name:product_json.seller_name },
-                            { "$push": { "unsendmsg": { "message": "Buyer_Response_seller", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                            { "$push": { "unsendmsg": { "message": "Buyer Raised 2nd Query", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                             //const done2 = await User.updateOne({ name:product_json.Customername },
-                             //   { "$push": { "unsendmsg": { "message": "Seller_Response_buyer", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
+                             //   { "$push": { "unsendmsg": { "message": "Seller Answer 2nd Query", "incomingsocketid": JSON.stringify(product_json) } }, }, { upsert: false, strict: false });
                         
                         console.log(done);
                         //console.log(done2);

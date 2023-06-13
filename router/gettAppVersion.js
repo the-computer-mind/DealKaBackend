@@ -70,7 +70,7 @@ try{router.post('/getallappversion',  async (req, res ) => {
                     console.log(all_products);
                     res.setHeader('total_products',"information");
                     const all_productse= [all_products,user.UserRole,user.UserStatus];
-            
+                    res.setHeader('userrole',user.UserRole);
                     res.status(201).send(all_productse);
             
                 }
@@ -82,7 +82,7 @@ try{router.post('/getallappversion',  async (req, res ) => {
                     console.log(all_products);
                     res.setHeader('total_products',"information");
                     const all_productse= [all_products,user.UserRole,user.UserStatus];
-            
+                    res.setHeader('userrole',user.UserRole);
                     res.status(201).send(all_productse);
                 }
             }
