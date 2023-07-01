@@ -35,6 +35,12 @@ router.post('/storeuserbygoogleapi', async (req, res) => {
             var refertime = req.header("refertime");
             var profilepic = req.header("ProfilePicture");
             var refertomodel = req.header("refertomodel");
+            var walletModel = req.header("walletmodel");
+            var ip=req.header("ip");
+            var deviceimei= req.header("imei");
+            var androidid= req.header("androidid");
+            var phoneinfo=req.header("phoneinfo");
+            var phoneversion=req.header("phoneversion");
             console.log(date + "time");
             console.log("storeuserbygoogleapi" + name.toLowerCase());
 
@@ -65,9 +71,14 @@ router.post('/storeuserbygoogleapi', async (req, res) => {
                         const hashedPasswd = await bcrypt.hash(password,salt);
                         // password=hashedPasswd;
                         // cpassword=hashedPasswd;
-                        
 
-                        const user = new User({ name: namelower, email: email, password: hashedPasswd, cpassword: hashedPasswd,UserRole:"Normal",UserVerified:"No"});
+                        
+                        console.log("imei of device" + deviceimei);
+                        const user = new User({ name: namelower, email: email, password: hashedPasswd, cpassword: hashedPasswd,StripeCustomerID:"null" ,StripeClientSecret:"null" ,UserRole:"Normal",UserVerified:"No",location_uv:[],ip: ip,
+                        imei: deviceimei,
+                        phone_info: phoneinfo,
+                        phone_version: phoneversion,
+                        AndrodID: androidid});
                         
                         const alltoken = await user.generateAuthToken();
                         console.log("google iiiii good");
@@ -87,7 +98,7 @@ router.post('/storeuserbygoogleapi', async (req, res) => {
                             console.log(channelinfo);
                         const userinfo = await user.save().then(async () => {
                             var refercodenew = "rc"+namelower.replace(/\s+/g, '');
-                            Wallet.findOne({ "Refercode" : refercode }).then(async (userExist) => {
+                         if(refercode!="null")  { Wallet.findOne({ "Refercode" : refercode }).then(async (userExist) => {
                                 console.log("hello bhaiya");
                                 console.log(refercode);
                                 console.log(userExist);
@@ -119,8 +130,19 @@ router.post('/storeuserbygoogleapi', async (req, res) => {
                                 console.log(err);
                                 res.status(500).send("Somethig Wrong line 103 signupstore");
                                 return;
-                            });
-                            const wallet = new Wallet({WalletId:namelower,Refercode:refercodenew,referBy:refercode,referTime:refertime,CurrentWalletBalance:"0",TotalNumberOfRefer:"0"});
+                            });} else {
+                                console.log("hello here is your refercode :-- " + refercode);
+                                refercode="null";
+                            }
+                            walletModel= JSON.parse(walletModel);
+                            walletModel.WalletId=namelower;
+                            walletModel.Refercode=refercodenew;
+                            walletModel.referBy=refercode;
+                            walletModel.ReferTo=[];
+                            walletModel.referTime=refertime;
+                            walletModel.CurrentWalletBalance="100";
+                            walletModel.TotalNumberOfRefer="0";
+                            const wallet = new Wallet(walletModel);
                             const walletinfo = await wallet.save();
                             console.log(walletinfo);
                             console.log(refercodenew);

@@ -20,6 +20,8 @@ const Product = require("../model/productSchema");
 const UserBankAccount = require("../model/UserBankAccountModel");
 const jwtauth = require('./jwt_auth');
 const { json } = require('express');
+const stripe = require('stripe')('sk_test_51NJbiSSC9DJrgR4G1QBR8teJNwbbxVFobMrorPy06Jf3PPmEVnn2UyjWgfeW66WwiVP9L3VkPTZZEVHxeFn7vnrG00DsyB1SHy');
+const host = "http://localhost:3000";
 
 router.post('/AddanewbankAcc',  async (req, res ) => {
 
@@ -34,6 +36,7 @@ router.post('/AddanewbankAcc',  async (req, res ) => {
       console.log(req.header("authorization")+"hiii");
       // console.log(req.header("size") + "hiii");
       var username = req.header("username");
+      var Mobile = req.header("Mobile");
       var type = req.header("type");
       console.log("req.body[1]");
         // var newHeaders = headers.split(",");
@@ -98,7 +101,29 @@ router.post('/AddanewbankAcc',  async (req, res ) => {
                 console.log("hello byby");
                 console.log(buyinfo);
                 const latestbank = await UserBankAccount.findOne({  name: username });
+                
+
+               // const account = await stripe.accounts.create({type: "express",});
+
+                // const accountLinks = await stripe.accountLinks.create({
+
+                // account: account.id,
+
+                // refresh_url: `${host}/api/stripe/account/reauth?account_id=${account.id}`, 
+                // return_url: `${host}/register${Mobile=="Yes"? "-mobile" : ""}?account_id=${account.id}&result-success`,
+
+                // type: "account_onboarding",
+
+                // });
+                // console.log(accountLinks);
+
+                // if (Mobile=="Yes") { 
+                //     res.setHeader("accountlink",accountLinks.url)
+                //     res.status(201).send(latestbank);}
+                res.setHeader("accountlink","")
                 res.status(201).send(latestbank);
+                // In case of request generated from the flutter app, return a json response res.status(200).json(success: true, url: accountLinks.url})
+                
           } else if (user.UserRole=="Seller") {
             if(type != "Create"){const mdone2 = await UserBankAccount.updateOne({  name: username },
                 { "$push": { "ListOfUserBAnkAccount":

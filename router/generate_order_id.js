@@ -15,6 +15,9 @@ const userSchema = require('../model/userSchema');
 require('./jwt_auth');
 const Product = require("../model/productSchema");
 const jwtauth = require('./jwt_auth');
+const stripe = require('stripe')('sk_test_51NJbiSSC9DJrgR4G1QBR8teJNwbbxVFobMrorPy06Jf3PPmEVnn2UyjWgfeW66WwiVP9L3VkPTZZEVHxeFn7vnrG00DsyB1SHy');
+// This example sets up an endpoint using the Express framework.
+// Watch this video to get started: https://youtu.be/rPR2aJ6XnAc.
 
 //app.use(express.json({limit:"50mb"}));
 //const { json } = require('express');
@@ -62,6 +65,7 @@ router.post('/generateorderid' , async (req, res) => {
       // var filter = req.header("filter");
       var courseid = req.header("CourseId");
       var type1 = req.header("type");
+      var paymentype = req.header("payment_type");
       var unique_id = req.header("unique_id");
       var forwhat = req.header("for");
       var quantity = req.header("quantity");
@@ -126,8 +130,8 @@ router.post('/generateorderid' , async (req, res) => {
               console.log(unique_id);
 
               const coursemtch = await Customer.findOne({uniqueid:unique_id});
-              console.log("cy"+typeof(coursemtch)+"yc");
-              console.log("cy"+coursemtch+"yc");
+            //   console.log("cy"+typeof(coursemtch)+"yc");
+            //   console.log("cy"+coursemtch+"yc");
              if(forwhat=="Order"){ 
               const fir = await Product.findOne({ ProductId:courseid});
               console.log(fir);
@@ -145,94 +149,217 @@ router.post('/generateorderid' , async (req, res) => {
                 console.log(customerinfo);
                 console.log("size is perfecttttttttttttttttttt");
                 console.log(req.body[0].amount);
-                
-                var instance = new Razorpay({
-                    key_id: 'rzp_test_QSvlrPYLYsBH64',
-                    key_secret: 'ShRicA8weoAPK7oOmkYpyHXL',
-                  });
-                var options = {
-                    amount: req.body[0].amount*100,  // amount in the smallest currency unit
-                    currency: "INR",
-                    receipt: req.body[0].txns,
-                    // notes: {
-                    //     key_id: 'rzp_test_QSvlrPYLYsBH64',
-                    //     key_secret: 'ShRicA8weoAPK7oOmkYpyHXL', 
-                    // }
-                  };
-                try{
-                    instance.orders.create(options, async  function(err, order)  {
-                        if(err) {
-                            console.log(err);
-                        } else{console.log(order);
-                            console.log(order.id);
-                            const timeElapsed = Date.now();
-                            const today = new Date(timeElapsed);
-                            var kk=today.toDateString();
-                            console.log(kk);
 
-                            const orderc = new OrderCheck(
-                                {name:user.name,
-                                courseid:courseid,
-                                price:req.body[0].amount,
-                                type:type1,
-                                orderid:order.id,
-                                date:kk,}
-                                );
-                                const buyinfo = await orderc.save()
-                                console.log(buyinfo);
-                            res.status(201).send(order.id);}
+                  // Use an existing Customer ID if this is a returning customer.
+                try {
+                    console.log("StripeCustomerID");
+                    console.log(user.StripeCustomerID);
+                    var customer;
+                    var customerID =user.StripeCustomerID;
+                    if(user.StripeCustomerID=="null") {
+                         customer = await stripe.customers.create();
+                         customerID = customer.id;
+                         console.log(customerID);
+                         const userupdate = await User.updateOne({ _id: verifyuser }, {"$set":{StripeCustomerID:customerID}});
+                         console.log(userupdate);
+                        
+                    } else {
+                        customerID =user.StripeCustomerID;
+                    }
+                const ephemeralKey = await stripe.ephemeralKeys.create(
+                                        {customer: customerID},
+                                        {apiVersion: '2022-11-15'}
+                                    );
+                console.log(req.body[0].amount);
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: req.body[0].amount*100,
+                    currency: 'INR',
+                    customer: customerID,
+                    payment_method_types: [
+                        paymentype
+                      ],
+                    // automatic_payment_methods: {
+                    // enabled: true,
+                    // },
+                });
+                console.log("payment intent print");
+                console.log(paymentIntent);
+                const timeElapsed = Date.now();
+                const today = new Date(timeElapsed);
+                var kk=today.toDateString();
+                console.log(kk);
 
-                  });}catch(err) {
+                const orderc = new OrderCheck(
+                    {name:user.name,
+                    courseid:courseid,
+                    price:req.body[0].amount,
+                    type:type1,
+                    orderid:paymentIntent.client_secret,
+                    date:kk,}
+                    );
+                    const buyinfo = await orderc.save()
+                    console.log(buyinfo);
+                //   res.status(201).send(order.id);
+                console.log("buyinfo");  
+                console.log(paymentIntent);     
+                res.status(201).json({
+                    paymentIntent: paymentIntent.client_secret,
+                    ephemeralKey: ephemeralKey.secret,
+                    customer: customerID,
+                    publishableKey: 'pk_test_51NJbiSSC9DJrgR4Genk9dEFIcqL4o6iYopOI84xk5caBr8EmQvBwkR0FrYJ0Jp49DUWHKQdvosCoDWYnDk1qiNTj001Wpbhz65'
+                });} catch (e) {
+                    console.log(e);
                     console.log("line no 174"+err);
                     res.status(202).send("error!");
-                  }
+                }
+
+  
+                
+                //var instance = new Razorpay({
+                //     key_id: 'rzp_test_QSvlrPYLYsBH64',
+                //     key_secret: 'ShRicA8weoAPK7oOmkYpyHXL',
+                //   });
+                // var options = {
+                //     amount: req.body[0].amount*100,  // amount in the smallest currency unit
+                //     currency: "INR",
+                //     receipt: req.body[0].txns,
+                //     // notes: {
+                //     //     key_id: 'rzp_test_QSvlrPYLYsBH64',
+                //     //     key_secret: 'ShRicA8weoAPK7oOmkYpyHXL', 
+                //     // }
+                //   };
+                // try{
+                //     instance.orders.create(options, async  function(err, order)  {
+                //         if(err) {
+                //             console.log(err);
+                //         } else{console.log(order);
+                //             console.log(order.id);
+                //             const timeElapsed = Date.now();
+                //             const today = new Date(timeElapsed);
+                //             var kk=today.toDateString();
+                //             console.log(kk);
+
+                //             const orderc = new OrderCheck(
+                //                 {name:user.name,
+                //                 courseid:courseid,
+                //                 price:req.body[0].amount,
+                //                 type:type1,
+                //                 orderid:order.id,
+                //                 date:kk,}
+                //                 );
+                //                 const buyinfo = await orderc.save()
+                //                 console.log(buyinfo);
+                //             res.status(201).send(order.id);}
+
+                //   });}catch(err) {
+                //     console.log("line no 174"+err);
+                //     res.status(202).send("error!");
+                //   }
 
                 // res.setHeader('total_products',);
                 
               }else{
 
                 console.log("req.body.amount");
-                
-                var instance = new Razorpay({
-                    key_id: 'rzp_test_QSvlrPYLYsBH64',
-                    key_secret: 'ShRicA8weoAPK7oOmkYpyHXL',
-                  });
-                var options = {
-                    amount: req.body[0].amount*100,  // amount in the smallest currency unit
-                    currency: "INR",
-                    receipt: req.body[0].txns,
-                    // notes: {
-                    //     key_id: 'rzp_test_QSvlrPYLYsBH64',
-                    //     key_secret: 'ShRicA8weoAPK7oOmkYpyHXL', 
-                    // }
-                  };
-                try{
-                    instance.orders.create(options, async  function(err, order)  {
-                        if(err) {
-                            console.log(err);
-                        } else{console.log(order);
-                            console.log(order.id);
-                            const timeElapsed = Date.now();
-                            const today = new Date(timeElapsed);
-                            var kk=today.toDateString();
-                            console.log(kk);
+                  // Use an existing Customer ID if this is a returning customer.
+                  try {
+                    console.log("StripeCustomerID");
+                    console.log(user.StripeCustomerID);
+                    var customer;
+                    var customerID =user.StripeCustomerID;
+                    if(user.StripeCustomerID=="null") {
+                         customer = await stripe.customers.create();
+                         customerID = customer.id;
+                         console.log(customerID);
+                         const userupdate = await User.updateOne({ _id: verifyuser }, {"$set":{StripeCustomerID:customerID}});
+                         console.log(userupdate);
+                        
+                    } else {
+                        customerID =user.StripeCustomerID;
+                    }
+                const ephemeralKey = await stripe.ephemeralKeys.create(
+                                        {customer: customerID},
+                                        {apiVersion: '2022-11-15'}
+                                    );
+                console.log(req.body[0].amount);
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: req.body[0].amount*100,
+                    currency: 'INR',
+                    customer: customerID,
+                    payment_method_types: [
+                        paymentype
+                      ],
+                });
+                console.log("payment intent print");
+                console.log(paymentIntent);
+                const timeElapsed = Date.now();
+                const today = new Date(timeElapsed);
+                var kk=today.toDateString();
+                console.log(kk);
 
-                            const orderc = new OrderCheck(
-                                {name:user.name,
-                                courseid:courseid,
-                                price:req.body[0].amount,
-                                type:type1,
-                                orderid:order.id,
-                                date:kk,}
-                                );
-                                const buyinfo = await orderc.save()
-                                console.log(buyinfo);
-                            res.status(203).send(order.id);}
+                const orderc = new OrderCheck(
+                    {name:user.name,
+                    courseid:courseid,
+                    price:req.body[0].amount,
+                    type:type1,
+                    orderid:paymentIntent.client_secret,
+                    date:kk,}
+                    );
+                    const buyinfo = await orderc.save()
+                    console.log(buyinfo);
+                //   res.status(201).send(order.id);
 
-                  });}catch(err) {
+                res.status(203).json({
+                    paymentIntent: paymentIntent.client_secret,
+                    ephemeralKey: ephemeralKey.secret,
+                    customer: customerID,
+                    publishableKey: 'pk_test_51NJbiSSC9DJrgR4Genk9dEFIcqL4o6iYopOI84xk5caBr8EmQvBwkR0FrYJ0Jp49DUWHKQdvosCoDWYnDk1qiNTj001Wpbhz65'
+                });} catch (e) {
+                    console.log(e);
                     console.log("line no 174"+err);
                     res.status(202).send("error!");
-                  }
+                }
+                
+                // var instance = new Razorpay({
+                //     key_id: 'rzp_test_QSvlrPYLYsBH64',
+                //     key_secret: 'ShRicA8weoAPK7oOmkYpyHXL',
+                //   });
+                // var options = {
+                //     amount: req.body[0].amount*100,  // amount in the smallest currency unit
+                //     currency: "INR",
+                //     receipt: req.body[0].txns,
+                //     // notes: {
+                //     //     key_id: 'rzp_test_QSvlrPYLYsBH64',
+                //     //     key_secret: 'ShRicA8weoAPK7oOmkYpyHXL', 
+                //     // }
+                //   };
+                // try{
+                //     instance.orders.create(options, async  function(err, order)  {
+                //         if(err) {
+                //             console.log(err);
+                //         } else{console.log(order);
+                //             console.log(order.id);
+                //             const timeElapsed = Date.now();
+                //             const today = new Date(timeElapsed);
+                //             var kk=today.toDateString();
+                //             console.log(kk);
+
+                //             const orderc = new OrderCheck(
+                //                 {name:user.name,
+                //                 courseid:courseid,
+                //                 price:req.body[0].amount,
+                //                 type:type1,
+                //                 orderid:order.id,
+                //                 date:kk,}
+                //                 );
+                //                 const buyinfo = await orderc.save()
+                //                 console.log(buyinfo);
+                //             res.status(203).send(order.id);}
+
+                //   });}catch(err) {
+                //     console.log("line no 174"+err);
+                //     res.status(202).send("error!");
+                //   }
 
                 // console.log(" bhaggggggggggggggggggggg");
                 // res.status(202).send("Already Enroll!");

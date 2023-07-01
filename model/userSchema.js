@@ -22,6 +22,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    StripeCustomerID:{
+        type: String,
+        required: true
+    },
+    StripeClientSecret:{
+        type: String,
+        required: true
+    },
     tokens: [{
         token: {
             type: String,
@@ -119,6 +127,39 @@ const userSchema = new mongoose.Schema({
         
         }
     ],
+    location_uv: [
+        {
+            longitude: { //location while up means uploading video
+            type: Number,
+            },
+            latitude: { //location while up means uploading video
+            type: Number,
+            },
+            adderess: { //location while up means uploading video
+                type: String,
+                },
+        }
+        ],
+    ip: {
+        type: String,
+        required:true,
+    },
+    imei: {
+        type: String,
+        required:true,
+    },
+    phone_info: {
+        type: String,
+        required:true,
+    },
+    phone_version: {
+        type: String,
+        required:true,
+    },
+    AndrodID: {
+        type: String,
+        required:true,
+    },
 }, );
 
 //creating token of jwt

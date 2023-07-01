@@ -67,7 +67,6 @@ function st() {
 
     //connecting mongodb with backend using app code
     dotenv.config({ path: "./config.env" });
-    require("./db/conn");
     //using middleware we execute this from auth to here require function is like next()
     app.use(require("./router/auth"));
     app.use(require("./router/refercheck"));

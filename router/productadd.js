@@ -24,7 +24,7 @@ router.post('/productadd',upload.array("image",3),  async (req, res ) => {
 
     try {
     console.log("enteringggg to productadd");
-    console.log(req.files.length);
+    // console.log(req.files.length);
     var newHeaders = [];
     newHeaders = req.header("authorization").split(",");
     console.log(req.header("authorization")+"hiii");
@@ -94,36 +94,37 @@ router.post('/productadd',upload.array("image",3),  async (req, res ) => {
 
                                 console.log("user");
                                 console.log("devi 1");
-                                const imageurl = [];
+                                console.log( req.body.json.ProductImageUrl);
+                                // const imageurl = [];
                                 
-                                for (i = 0; i < req.files.length; i++) {
-                                    const result = await cloudinary.uploader.upload(req.files[i].path);
-                                    console.log(result.secure_url);
-                                    imageurl.push(result.secure_url);
-                                }
-                                console.log("kiooooooooooooooooooooooooooo line 105");
+                                // for (i = 0; i < req.files.length; i++) {
+                                //     const result = await cloudinary.uploader.upload(req.files[i].path);
+                                //     console.log(result.secure_url);
+                                //     imageurl.push(result.secure_url);
+                                // }
+                                // console.log("kiooooooooooooooooooooooooooo line 105");
 
-                                const files = fs.readdirSync("./router/multer_images");
-                                console.log("hiiiiiiiiiiiiiiiiiii");
-                                try {
-                                    if (files != null) {
-                                        for (const file of files) {
-                                            console.log(file);
-                                            fs.unlinkSync(path.join("./router/multer_images", file), err => {
-                                                if (err) throw err;
-                                            });
-                                        }
-                                    }
-                                } catch (e) {
-                                    console.log("under err" + e);
-                                }
-                                console.log(imageurl+"jiiiiiiiii");
+                                // const files = fs.readdirSync("./router/multer_images");
+                                // console.log("hiiiiiiiiiiiiiiiiiii");
+                                // try {
+                                //     if (files != null) {
+                                //         for (const file of files) {
+                                //             console.log(file);
+                                //             fs.unlinkSync(path.join("./router/multer_images", file), err => {
+                                //                 if (err) throw err;
+                                //             });
+                                //         }
+                                //     }
+                                // } catch (e) {
+                                //     console.log("under err" + e);
+                                // }
+                                // console.log(imageurl+"jiiiiiiiii");
                                 
-                                req.body.json.ProductImageUrl = imageurl;
-                                console.log(req.body.json);
+                                // req.body.json.ProductImageUrl = imageurl;
+                                // console.log(req.body.json);
                                 
-                                product_json.ProductImageUrl = imageurl
-                                console.log(product_json);
+                                // product_json.ProductImageUrl = imageurl
+                                // console.log(product_json);
                                 const user = await User.findOne({ _id: verifyuser });
                                 console.log("r1");
                                 const oldproduct = await Product.findOne({ name: user.name });
@@ -166,36 +167,36 @@ router.post('/productadd',upload.array("image",3),  async (req, res ) => {
                 } else if (!userExist) {
                     console.log("user");
                     console.log("devi 1");
-                    const imageurl = [];
+                    // const imageurl = [];
                     
-                    for (i = 0; i < req.files.length; i++) {
-                        const result = await cloudinary.uploader.upload(req.files[i].path);
-                        console.log(result.secure_url);
-                        imageurl.push(result.secure_url);
-                    }
-                    console.log(imageurl);
-                    console.log("kiooooooooooooooooooooooooooo line 105");
+                    // for (i = 0; i < req.files.length; i++) {
+                    //     const result = await cloudinary.uploader.upload(req.files[i].path);
+                    //     console.log(result.secure_url);
+                    //     imageurl.push(result.secure_url);
+                    // }
+                    // console.log(imageurl);
+                    // console.log("kiooooooooooooooooooooooooooo line 105");
 
-                    const files = fs.readdirSync("./router/multer_images");
-                    console.log("hiiiiiiiiiiiiiiiiiii");
-                    try {
-                        if (files != null) {
-                            for (const file of files) {
-                                console.log(file);
-                                fs.unlinkSync(path.join("./router/multer_images", file), err => {
-                                    if (err) throw err;
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        console.log("under err" + e);
-                    }
+                    // const files = fs.readdirSync("./router/multer_images");
+                    // console.log("hiiiiiiiiiiiiiiiiiii");
+                    // try {
+                    //     if (files != null) {
+                    //         for (const file of files) {
+                    //             console.log(file);
+                    //             fs.unlinkSync(path.join("./router/multer_images", file), err => {
+                    //                 if (err) throw err;
+                    //             });
+                    //         }
+                    //     }
+                    // } catch (e) {
+                    //     console.log("under err" + e);
+                    // }
                     
-                    req.body.json.ProductImageUrl = imageurl;
-                    console.log(req.body.json);
+                    // req.body.json.ProductImageUrl = imageurl;
+                    // console.log(req.body.json);
                     
-                    product_json.ProductImageUrl = imageurl
-                    console.log(product_json);
+                    // product_json.ProductImageUrl = imageurl
+                    // console.log(product_json);
                     const user = await User.findOne({ _id: verifyuser });
                     console.log("r1");
                     const oldproduct = await Product.findOne({ name: user.name });

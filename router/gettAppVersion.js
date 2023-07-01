@@ -17,6 +17,8 @@ const AppUpdate = require("../model/AppUpdateModel");
 
 const jwtauth = require('./jwt_auth');
 const { json, response } = require('express');
+const Wallet = require('../model/UserWallet_Model');
+
 
 try{router.post('/getallappversion',  async (req, res ) => {
 
@@ -64,12 +66,14 @@ try{router.post('/getallappversion',  async (req, res ) => {
         // console.log(User)
         if (devicenum == 1 || devicenum == 2 || devicenum == 3 || devicenum == 4 || devicenum == 0) {
             const user = await User.findOne({ _id: verifyuser });
+            var ref = await Wallet.findOne({ "WalletId" : user.name });
+            console.log(ref);
             if(multi=="All") {
                     console.log('under appupdatefind');
                     const all_products = await AppUpdate.find();
                     console.log(all_products);
                     res.setHeader('total_products',"information");
-                    const all_productse= [all_products,user.UserRole,user.UserStatus];
+                    const all_productse= [all_products,user.UserRole,user.UserStatus,ref];
                     res.setHeader('userrole',user.UserRole);
                     res.status(201).send(all_productse);
             
@@ -81,7 +85,7 @@ try{router.post('/getallappversion',  async (req, res ) => {
                     const all_products = await AppUpdate.find().sort({index:-1}).limit(1)
                     console.log(all_products);
                     res.setHeader('total_products',"information");
-                    const all_productse= [all_products,user.UserRole,user.UserStatus];
+                    const all_productse= [all_products,user.UserRole,user.UserStatus,ref];
                     res.setHeader('userrole',user.UserRole);
                     res.status(201).send(all_productse);
                 }

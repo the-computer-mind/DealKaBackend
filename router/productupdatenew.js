@@ -20,17 +20,17 @@ const Product = require("../model/productSchema");
 const jwtauth = require('./jwt_auth');
 const { json } = require('express');
 
-router.post('/productupdatenew',upload.array("image",3),  async (req, res ) => {
+router.post('/productupdatenew',  async (req, res ) => {
 
     try {
     console.log("enteringggg to productupdatenew");
-    console.log(req.files.length);
+    
     var imgchange = req.header("wantochangeimg");
     var newHeaders = [];
     newHeaders = req.header("authorization").split(",");
     console.log(req.header("authorization")+"hiii");
     // const productata = JSON.parse(req.body);
-    console.log(JSON.parse(req.body.json)); //this is the productmodel coming from flutter
+    //console.log(JSON.parse(req.body.json)); //this is the productmodel coming from flutter
     console.log("req.body[1]");
       // var newHeaders = headers.split(",");
     const devicenum = newHeaders[0].slice(1, 2);
@@ -72,7 +72,8 @@ router.post('/productupdatenew',upload.array("image",3),  async (req, res ) => {
         console.log(User)
         if (devicenum == 1 || devicenum == 2 || devicenum == 3 || devicenum == 4 || devicenum == 0) {
             console.log('under refer==true');
-            var product_json = JSON.parse(req.body.json)
+            console.log(req.body)
+            var product_json = req.body
             Product.findOne({ "products.ProductId" : product_json.ProductId }).then(async (userExist) => {
                 if (userExist) {
                  
@@ -84,38 +85,38 @@ router.post('/productupdatenew',upload.array("image",3),  async (req, res ) => {
 
                                 console.log("user");
                                 console.log("devi 1");
-                                const imageurl = [];
-                                if (imgchange=="true") {
-                                     for (i = 0; i < req.files.length; i++) {
-                                    const result = await cloudinary.uploader.upload(req.files[i].path);
-                                    console.log(result.secure_url);
-                                    imageurl.push(result.secure_url);
-                                }
-                                console.log("kiooooooooooooooooooooooooooo line 105");
+                                // const imageurl = [];
+                                // if (imgchange=="true") {
+                                //      for (i = 0; i < req.files.length; i++) {
+                                //     const result = await cloudinary.uploader.upload(req.files[i].path);
+                                //     console.log(result.secure_url);
+                                //     imageurl.push(result.secure_url);
+                                // }
+                                // console.log("kiooooooooooooooooooooooooooo line 105");
 
-                                const files = fs.readdirSync("./router/multer_images");
-                                console.log("hiiiiiiiiiiiiiiiiiii");
-                                try {
-                                    if (files != null) {
-                                        for (const file of files) {
-                                            console.log(file);
-                                            fs.unlinkSync(path.join("./router/multer_images", file), err => {
-                                                if (err) throw err;
-                                            });
-                                        }
-                                    }
-                                } catch (e) {
-                                    console.log("under err" + e);
-                                }
-                                console.log(imageurl+"jiiiiiiiii");
+                                // const files = fs.readdirSync("./router/multer_images");
+                                // console.log("hiiiiiiiiiiiiiiiiiii");
+                                // try {
+                                //     if (files != null) {
+                                //         for (const file of files) {
+                                //             console.log(file);
+                                //             fs.unlinkSync(path.join("./router/multer_images", file), err => {
+                                //                 if (err) throw err;
+                                //             });
+                                //         }
+                                //     }
+                                // } catch (e) {
+                                //     console.log("under err" + e);
+                                // }
+                                // console.log(imageurl+"jiiiiiiiii");
                                 
-                                req.body.json.ProductImageUrl = imageurl;
-                                console.log(req.body.json);
+                                // req.body.json.ProductImageUrl = imageurl;
+                                // console.log(req.body.json);
                                 
-                                product_json.ProductImageUrl = imageurl
-                                console.log(product_json);
-                                }
-                                console.log(product_json.ProductPrice);
+                                // product_json.ProductImageUrl = imageurl
+                                // console.log(product_json);
+                                // }
+                                // console.log(product_json.ProductPrice);
                                 console.log("user");
                                 console.log("devi 1");
                                             

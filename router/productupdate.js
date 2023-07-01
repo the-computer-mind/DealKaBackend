@@ -17,7 +17,7 @@ const Product = require("../model/productSchema");
 const jwtauth = require('./jwt_auth');
 const { json } = require('express');
 
-router.post('/productupdate',  async (req, res ) => {
+router.post('/productupdate',upload.array("image",3), async (req, res ) => {
 
     try {
     console.log("enteringggg to productupdate");
@@ -73,7 +73,7 @@ router.post('/productupdate',  async (req, res ) => {
         console.log(User)
         if (devicenum == 1 || devicenum == 2 || devicenum == 3 || devicenum == 4 || devicenum == 0) {
                     console.log('under refer========true');
-                    var product_json = req.body;
+                    var product_json = req.body.json;
                     console.log(product_json.ProductPrice);
                     console.log("user");
                     console.log("devi 1");

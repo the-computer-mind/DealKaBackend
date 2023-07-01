@@ -31,6 +31,9 @@ router.post('/ReferCodeCheck',  async (req, res ) => {
     var refercode = req.header("refercode");
     // const productata = JSON.parse(req.body);//this is the productmodel coming from flutter
     console.log("req.body[1]");
+    var deviceimei= req.header("imei");
+    var androidid= req.header("androidid");
+    var phoneinfo=req.header("phoneinfo");
       // var newHeaders = headers.split(",");
     
 
@@ -42,13 +45,18 @@ router.post('/ReferCodeCheck',  async (req, res ) => {
             Wallet.findOne({ "Refercode" : refercode }).then(async (userExist) => {
                 console.log("hello bhaiya");
                 console.log(userExist);
-                if (userExist) {
+                var uess = await User.findOne({ WalletId: userExist.WalletId });
+                if(uess.AndrodID!=androidid ){if (userExist) {
                     res.status(201).send("exist");return;
             
                     
                 } else  {
                     console.log("hello not exist");
                     res.status(202).send("not exist");
+                    return;
+                }} else {
+                    console.log("hello not exist");
+                    res.status(206).send("scam");
                     return;
                 }
             }).catch((err) => {
